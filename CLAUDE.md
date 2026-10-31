@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-Planning-only repo. No code, build, lint, or test tooling exists yet (`src/` and `eval/` hold only `.gitkeep` plus `eval/config.example.yaml`). Git initialised, no commits yet. `README.md` is the entry point; detailed plans live in `docs/01`–`docs/11` (no 09; it is local-only in `private/`). Read the relevant doc before implementing a component. Planned commands (e.g. `make eval`) are in the README success metrics but do not exist yet.
+Mostly planning. Implemented so far: `src/parse/quality.py` (extraction-quality heuristics), `scripts/week1_parse_spike.py` (week-1 fetch/parse/OCR spike), `tests/`. No build/lint config yet. Commands: `python3 -m pytest -q tests`; `pip install -r requirements-spike.txt` then `python3 scripts/week1_parse_spike.py` (slow: 2s polite delay per fetch; set `TESSERACT_BIN`/`TESSDATA_PREFIX` for OCR; outputs `data/corpus_manifest.csv`, `data/spike/report.md`, gitignored `data/raw/spike`, `data/processed/spike`). Findings: `docs/12-week1-parse-findings.md`. Git initialised, no commits yet. `README.md` is the entry point; detailed plans live in `docs/01`–`docs/11` (no 09; it is local-only in `private/`). Read the relevant doc before implementing a component. Planned commands (e.g. `make eval`) are in the README success metrics but do not exist yet.
 
 ## What IndicRAG is
 

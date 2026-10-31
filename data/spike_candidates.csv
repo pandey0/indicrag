@@ -1,0 +1,23 @@
+source_id,url,expected_lang,kind,publisher,topic
+rti_act_en,https://rti.gov.in/Writereaddata/RTI-Act.pdf,en,pdf,Dept of Personnel & Training (RTI portal),RTI Act text
+rti_act_hi,https://rti.gov.in/Writereaddata/RTI-ActinHindi.pdf,hi,pdf,Dept of Personnel & Training (RTI portal),RTI Act text
+rti_act_amended_en,"https://rti.gov.in/Writereaddata/RTI Act, 2005 (Amended)-English Version.PDF",en,pdf,Dept of Personnel & Training (RTI portal),RTI Act amended
+rti_act_amended_hi,https://rti.gov.in/Writereaddata/RTI Act Version Hindi.pdf,hi,pdf,Dept of Personnel & Training (RTI portal),RTI Act amended
+ahara_charter_kn,https://ahara.karnataka.gov.in/Aharadept/Doc/citizen_charter_kannnada.pdf,kn,pdf,Karnataka Food & Civil Supplies (Ahara),citizen charter / ration
+ahara_charter_en,https://ahara.karnataka.gov.in/Aharadept/Doc/citizen_charter_english.pdf,en,pdf,Karnataka Food & Civil Supplies (Ahara),citizen charter / ration
+sevasindhu_faq_kn,https://sevasindhu.karnataka.gov.in/Faq_Kan.html,kn,html,Karnataka e-Governance (Seva Sindhu),service FAQ
+sevasindhu_track_kn,https://sevasindhu.karnataka.gov.in/Track_your_application_kannada_1.html,kn,html,Karnataka e-Governance (Seva Sindhu),application tracking
+sevasindhu_gramaone_kn,https://sevasindhu.karnataka.gov.in/Gramaone/gramaone_franchise_kannada.html,kn,html,Karnataka e-Governance (Seva Sindhu),Grama One
+sevasindhu_depts_kn,https://sevasindhu.karnataka.gov.in/Sevasindhu/DepartmentServicesKannada,kn,html,Karnataka e-Governance (Seva Sindhu),departments and services
+sevasindhu_esign_en,https://sevasindhu.karnataka.gov.in/PDF/esign.pdf,en,pdf,Karnataka e-Governance (Seva Sindhu),e-sign help
+ceg_holidays_2021_kn,https://ceg.karnataka.gov.in/frontend/opt1/pdfs/Holidays-list-for-2021.pdf,kn,pdf,Karnataka e-Governance (CEG),holiday list
+nfsa_mera_ration_faq_en,https://nfsa.gov.in/doc/FAQ_for_Mera_Ration_2.pdf,en,pdf,Dept of Food & Public Distribution (NFSA),Mera Ration app FAQ
+nfsa_home_en,https://nfsa.gov.in/,en,html,Dept of Food & Public Distribution (NFSA),NFSA portal home
+nsp_student_faq_en,https://scholarships.gov.in/studentFAQs,en,html,National Scholarship Portal,student FAQ
+nsp_officer_faq_en,https://scholarships.gov.in/public/FAQ/DNO_SNO_FAQs_21122023_updated.pdf,en,pdf,National Scholarship Portal,officer FAQ
+nsp_npci_base_en,https://scholarships.gov.in/public/schemeGuidelines/npci_base.pdf,en,pdf,National Scholarship Portal,Aadhaar-seeded bank account guidance
+mygov_faq_en,https://www.mygov.in/mygov-faq,en,html,MyGov,portal FAQ
+rti_home_hi,https://rti.gov.in/hi,hi,html,Dept of Personnel & Training (RTI portal),RTI portal Hindi home
+rti_about_hi,https://rti.gov.in/hi/aboutrti.html,hi,html,Dept of Personnel & Training (RTI portal),about RTI
+rti_actpage_hi,https://rti.gov.in/hi/rtiact.html,hi,html,Dept of Personnel & Training (RTI portal),RTI Act page
+pib_about_hi,https://pib.gov.in/aboutpibh.aspx,hi,html,Press Information Bureau,about PIB (Hindi extraction test)
