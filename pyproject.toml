@@ -1,0 +1,17 @@
+[project]
+name = "indicrag"
+version = "0.1.0"
+description = "Hindi/Kannada/English RAG benchmark and reference system for Indian citizen-service documents"
+requires-python = ">=3.10"
+dependencies = ["requests>=2.31", "beautifulsoup4>=4.12", "lxml>=5", "pymupdf>=1.23"]
+
+[project.optional-dependencies]
+render = ["playwright>=1.40"]
+dev = ["pytest>=8", "ruff>=0.5"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 130
