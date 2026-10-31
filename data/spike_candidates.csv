@@ -21,3 +21,13 @@ rti_home_hi,https://rti.gov.in/hi,hi,html,Dept of Personnel & Training (RTI port
 rti_about_hi,https://rti.gov.in/hi/aboutrti.html,hi,html,Dept of Personnel & Training (RTI portal),about RTI
 rti_actpage_hi,https://rti.gov.in/hi/rtiact.html,hi,html,Dept of Personnel & Training (RTI portal),RTI Act page
 pib_about_hi,https://pib.gov.in/aboutpibh.aspx,hi,html,Press Information Bureau,about PIB (Hindi extraction test)
+ksedu_primary_kn,https://schooleducation.karnataka.gov.in/primaryeducation/kn,kn,html,Karnataka Dept of School Education,primary education (parallel kn/en)
+ksedu_primary_en,https://schooleducation.karnataka.gov.in/primaryeducation/en,en,html,Karnataka Dept of School Education,primary education (parallel kn/en)
+ksedu_midday_kn,https://schooleducation.karnataka.gov.in/middaybreakfastplan/kn,kn,html,Karnataka Dept of School Education,mid-day meal / breakfast scheme (parallel kn/en)
+ksedu_midday_en,https://schooleducation.karnataka.gov.in/middaybreakfastplan/en,en,html,Karnataka Dept of School Education,mid-day meal / breakfast scheme (parallel kn/en)
+ksedu_swf_kn,https://schooleducation.karnataka.gov.in/swftbf/kn,kn,html,Karnataka Dept of School Education,teachers welfare fund (parallel kn/en)
+ksedu_swf_en,https://schooleducation.karnataka.gov.in/swftbf/en,en,html,Karnataka Dept of School Education,teachers welfare fund (parallel kn/en)
+ksedu_minority_kn,https://schooleducation.karnataka.gov.in/minorityeducation/kn,kn,html,Karnataka Dept of School Education,minority language education (parallel kn/en)
+ksedu_minority_en,https://schooleducation.karnataka.gov.in/minorityeducation/en,en,html,Karnataka Dept of School Education,minority language education (parallel kn/en)
+karnataka_rti_manual_kn,https://ceg.karnataka.gov.in/assets/front/pdf/rti%20manual/RTI%20Manual__KANNADA.pdf,kn,pdf,Karnataka e-Governance (CEG),RTI manual
+bihar_rtps_home_hi,https://serviceonline.bihar.gov.in/,hi,html,Bihar Right to Public Services (RTPS),service list: certificates and licences

@@ -9,8 +9,10 @@ Fetch each candidate (politely), extract text, score extraction quality, and wri
 """
 from __future__ import annotations
 
+import argparse
 import csv
 import hashlib
+import json
 import os
 import shutil
 import subprocess
@@ -28,7 +30,7 @@ from bs4 import BeautifulSoup
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from src.parse.quality import classify, compute_metrics  # noqa: E402
+from src.parse.quality import classify, compute_metrics, layer_ocr_agreement  # noqa: E402
 
 UA = "IndicRAG-research-spike/0.1 (+https://github.com/; contact: arpit242002@gmail.com)"
 DELAY_S = 2.0
@@ -113,7 +115,27 @@ def ocr_sample(raw: bytes, lang: str) -> str | None:
     return "\n".join(out)
 
 
+def ocr_page(page, lang: str) -> str | None:
+    tess = os.environ.get("TESSERACT_BIN") or shutil.which("tesseract")
+    if not tess:
+        return None
+    with tempfile.NamedTemporaryFile(suffix=".png") as tf:
+        tf.write(page.get_pixmap(dpi=300).tobytes("png")); tf.flush()
+        return subprocess.run([tess, tf.name, "-", "-l", OCR_LANG[lang]], capture_output=True, text=True, timeout=300).stdout
+
+
+def layer_agreement(raw: bytes, lang: str) -> float | None:
+    """Agreement between text layer and OCR on the text-richest page (Indic PDFs only)."""
+    doc = fitz.open(stream=raw, filetype="pdf")
+    best = max(range(doc.page_count), key=lambda i: len(doc[i].get_text()))
+    o = ocr_page(doc[best], lang)
+    return None if o is None else layer_ocr_agreement(doc[best].get_text(), o, lang)
+
+
 def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--only', help='comma-separated source_ids to (re)run; others are kept from the previous run')
+    args = ap.parse_args()
     RAW.mkdir(parents=True, exist_ok=True)
     OUT.mkdir(parents=True, exist_ok=True)
     rows, report = [], []
@@ -122,6 +144,9 @@ def main() -> None:
     sess.headers["User-Agent"] = UA
     with open(ROOT / "data/spike_candidates.csv", newline="", encoding="utf-8") as f:
         cands = list(csv.DictReader(f))
+    if args.only:
+        want = set(args.only.split(','))
+        cands = [c for c in cands if c['source_id'] in want]
     for c in cands:
         sid, url, lang, kind = c["source_id"], safe_url(c["url"]), c["expected_lang"], c["kind"]
         row = dict.fromkeys(MANIFEST_COLS, "")
@@ -147,6 +172,11 @@ def main() -> None:
             (OUT / f"{sid}.txt").write_text(text, encoding="utf-8")
             m = compute_metrics(text, pages, fonts)
             status, reason = classify(m, lang, kind)
+            agree = None
+            if kind == "pdf" and status == "ok" and lang in ("hi", "kn"):
+                agree = layer_agreement(raw, lang)
+                if agree is not None and agree < 0.3:
+                    status, reason = "broken_text", f"text layer disagrees with OCR (word overlap {agree:.2f}); vowel signs likely corrupt"
             ocr_status = ""
             if kind == "pdf" and status in ("needs_ocr", "broken_text", "legacy_font"):
                 otext = ocr_sample(raw, lang)
@@ -158,13 +188,24 @@ def main() -> None:
                     reason += f" -> OCR({OCR_PAGES}p): {ocr_status}, script-share {max(om.dev_share, om.kan_share, om.lat_share):.2f}"
                     status = ocr_status
             row.update(title=title, parse_status=status, notes=reason)
-            report.append({**rep, "status": status, "reason": reason, **m.as_dict()})
+            report.append({**rep, "status": status, "reason": reason, "layer_ocr_agreement": agree, **m.as_dict()})
         except Exception as e:  # network/SSL/etc: record, never bypass verification
             row.update(parse_status="fetch_failed", notes=f"{type(e).__name__}: {str(e)[:120]}")
             report.append({**rep, "status": "fetch_failed", "reason": row["notes"]})
         rows.append(row)
         print(f"{sid:28s} {row['parse_status']:13s} {row['notes'][:70]}")
 
+    if args.only:  # merge into the previous run
+        old_rows = list(csv.DictReader(open(ROOT / "data/corpus_manifest.csv", encoding="utf-8")))
+        new_ids = {r["source_id"] for r in rows}
+        rows = [r for r in old_rows if r["source_id"] not in new_ids] + rows
+        try:
+            old_rep = json.load(open(ROOT / "data/spike/report.json", encoding="utf-8"))
+        except FileNotFoundError:
+            old_rep = []
+        report = [r for r in old_rep if r["source_id"] not in new_ids] + report
+    (ROOT / "data/spike").mkdir(exist_ok=True)
+    json.dump(report, open(ROOT / "data/spike/report.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     with open(ROOT / "data/corpus_manifest.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=MANIFEST_COLS)
         w.writeheader(); w.writerows(rows)

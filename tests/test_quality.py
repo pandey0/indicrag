@@ -41,3 +41,11 @@ def test_wrong_language_flagged():
 def test_replacement_chars_flagged_broken_text():
     t = "सूचना का अधिकार \ufffd\ufffd" * 40
     assert classify(compute_metrics(t, pages=1), "hi", "pdf")[0] == "broken_text"
+
+
+def test_layer_ocr_agreement():
+    from src.parse.quality import layer_ocr_agreement
+    good = "ಮಾಹಿತಿ ಹಕ್ಕು ನೋಡಲ್ ಅಧಿಕಾರಿಗಳು ಕೈಪಿಡಿ"
+    bad = "ಮಾಹಿತಿ ಹಕತು ರ್ ೋಡಲ್ ಅಧಿಕನರಿಗಳು ಕ ೈಪಿಡಿ"
+    assert layer_ocr_agreement(good, good, "kn") == 1.0
+    assert layer_ocr_agreement(bad, good, "kn") < 0.4

@@ -118,3 +118,15 @@ def classify(m: Metrics, expected_lang: str, kind: str) -> tuple[str, str]:
     if m.orphan_mark_rate > 0.05:
         return "broken_text", f"orphan combining marks {m.orphan_mark_rate:.2f}"
     return "ok", "passes heuristics (still needs human spot-check)"
+
+
+def layer_ocr_agreement(layer_text: str, ocr_text: str, lang: str) -> float:
+    """Jaccard overlap of Indic word sets between a PDF text layer and an OCR of the same page.
+
+    Catches text layers that look like valid Unicode but have swapped/missing vowel signs
+    (heuristic metrics miss these). Low (<~0.3) means the text layer is not trustworthy.
+    """
+    pat = {"hi": r"[\u0900-\u097F]+", "kn": r"[\u0C80-\u0CFF]+"}[lang]
+    a = {w for w in re.findall(pat, layer_text) if len(w) > 2}
+    b = {w for w in re.findall(pat, ocr_text) if len(w) > 2}
+    return len(a & b) / max(len(a | b), 1)

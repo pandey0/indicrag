@@ -1,6 +1,6 @@
 # Week-1 parse-feasibility report
 
-Generated 2026-10-31 17:09 UTC by `scripts/week1_parse_spike.py`. Metrics only (no document text).
+Generated 2026-10-31 17:20 UTC by `scripts/week1_parse_spike.py`. Metrics only (no document text).
 Heuristic status is NOT a quality guarantee: every `ok` still needs a human spot-check (see notes below).
 
 | source_id | exp. lang | kind | status | chars | pages | dev | kan | lat | latin1 | orphan marks | reason |
@@ -27,3 +27,13 @@ Heuristic status is NOT a quality guarantee: every `ok` still needs a human spot
 | rti_about_hi | hi | html | ok | 753 | 1 | 1.00 | 0.00 | 0.00 | 0.00 | 0.00 | passes heuristics (still needs human spot-check) |
 | rti_actpage_hi | hi | html | ok | 233 | 1 | 1.00 | 0.00 | 0.00 | 0.00 | 0.00 | passes heuristics (still needs human spot-check) |
 | pib_about_hi | hi | html | fetch_failed | - | - | - | - | - | - | - | HTTPError: 403 Client Error: Forbidden for url: https://www.pib.gov.in/aboutpibh.aspx |
+| ksedu_primary_kn | kn | html | ok | 13758 | 1 | 0.00 | 0.82 | 0.18 | 0.00 | 0.00 | passes heuristics (still needs human spot-check) |
+| ksedu_primary_en | en | html | ok | 12003 | 1 | 0.00 | 0.00 | 1.00 | 0.00 | 0.00 | passes heuristics (still needs human spot-check) |
+| ksedu_midday_kn | kn | html | ok | 14725 | 1 | 0.00 | 0.83 | 0.17 | 0.00 | 0.00 | passes heuristics (still needs human spot-check) |
+| ksedu_midday_en | en | html | ok | 12507 | 1 | 0.00 | 0.00 | 1.00 | 0.00 | 0.00 | passes heuristics (still needs human spot-check) |
+| ksedu_swf_kn | kn | html | ok | 14079 | 1 | 0.00 | 0.82 | 0.18 | 0.00 | 0.00 | passes heuristics (still needs human spot-check) |
+| ksedu_swf_en | en | html | ok | 12294 | 1 | 0.00 | 0.00 | 1.00 | 0.00 | 0.00 | passes heuristics (still needs human spot-check) |
+| ksedu_minority_kn | kn | html | ok | 14422 | 1 | 0.00 | 0.82 | 0.18 | 0.00 | 0.00 | passes heuristics (still needs human spot-check) |
+| ksedu_minority_en | en | html | ok | 12585 | 1 | 0.00 | 0.00 | 1.00 | 0.00 | 0.00 | passes heuristics (still needs human spot-check) |
+| bihar_rtps_home_hi | hi | html | ok | 103838 | 1 | 0.45 | 0.00 | 0.55 | 0.00 | 0.00 | passes heuristics (still needs human spot-check) |
+| karnataka_rti_manual_kn | kn | pdf | ocr_ok | 2183 | 7 | 0.00 | 0.90 | 0.10 | 0.00 | 0.04 | text layer disagrees with OCR (word overlap 0.06); vowel signs likely corrupt -> OCR(3p): ocr_ok, script-share 0.59 |
