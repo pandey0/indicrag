@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IndicRAG QA item",
+  "type": "object",
+  "required": [
+    "id",
+    "lang",
+    "question",
+    "qtype",
+    "difficulty",
+    "answer",
+    "evidence",
+    "dataset_version",
+    "source_kind"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "lang": {
+      "enum": [
+        "en",
+        "hi",
+        "kn"
+      ]
+    },
+    "register": {
+      "enum": [
+        "formal",
+        "colloquial",
+        "code_mixed",
+        "romanized",
+        "noisy"
+      ],
+      "default": "formal"
+    },
+    "question": {
+      "type": "string",
+      "minLength": 5
+    },
+    "qtype": {
+      "enum": [
+        "factoid",
+        "procedure",
+        "eligibility",
+        "doc_list",
+        "comparison",
+        "unanswerable",
+        "cross_lingual"
+      ]
+    },
+    "difficulty": {
+      "enum": [
+        "easy",
+        "medium",
+        "hard"
+      ]
+    },
+    "answer": {
+      "type": "string"
+    },
+    "answerable": {
+      "type": "boolean",
+      "default": true
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "doc_id",
+          "doc_sha256",
+          "parsed_sha256",
+          "parser_version",
+          "char_start",
+          "char_end",
+          "quote"
+        ],
+        "properties": {
+          "doc_id": {
+            "type": "string"
+          },
+          "doc_sha256": {
+            "type": "string",
+            "description": "sha256 of the RAW fetched file"
+          },
+          "char_start": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "char_end": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "parsed_sha256": {
+            "type": "string",
+            "description": "sha256 of the parsed text the offsets refer to"
+          },
+          "parser_version": {
+            "type": "string"
+          },
+          "quote": {
+            "type": "string",
+            "description": "verbatim text of the span; used to validate and re-anchor offsets"
+          }
+        }
+      }
+    },
+    "valid_as_of": {
+      "type": "string",
+      "format": "date"
+    },
+    "labeller": {
+      "type": "string"
+    },
+    "reviewer": {
+      "type": "string"
+    },
+    "review_status": {
+      "enum": [
+        "unreviewed",
+        "agreed",
+        "revised",
+        "rejected"
+      ],
+      "default": "unreviewed"
+    },
+    "dataset_version": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "variant_of": {
+      "type": "string",
+      "description": "id of the base item this noisy/romanized/code-mixed variant was derived from"
+    },
+    "source_kind": {
+      "enum": [
+        "hand_written",
+        "llm_drafted_validated",
+        "real_query"
+      ]
+    },
+    "writer": {
+      "type": "string",
+      "description": "who wrote the question; should differ from the person who selected the evidence where possible"
+    }
+  }
+}

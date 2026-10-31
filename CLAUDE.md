@@ -1,0 +1,51 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Status
+
+Planning-only repo. No code, build, lint, or test tooling exists yet (`src/` and `eval/` hold only `.gitkeep` plus `eval/config.example.yaml`). Git initialised, no commits yet. `README.md` is the entry point; detailed plans live in `docs/01`–`docs/11` (no 09; it is local-only in `private/`). Read the relevant doc before implementing a component. Planned commands (e.g. `make eval`) are in the README success metrics but do not exist yet.
+
+## What IndicRAG is
+
+Hindi / Kannada / English benchmark + reference RAG system over Indian citizen-service documents, with a phase-3 tool-using agent. Deliverables: labelled dataset, eval harness, FastAPI + Next.js app with citations, agent evaluated on trajectory quality. Out of scope v1: fine-tuning, voice, user accounts/PII, legal/financial advice.
+
+## Planned architecture (docs/02-architecture.md)
+
+Pipeline: Ingest → Parse/Clean → Chunk → Embed/Index (Postgres + pgvector, single DB for vectors, metadata, and tsvector lexical search) → Retrieve (dense / lexical / hybrid RRF / optional rerank) → Generate (pluggable LLM provider interface, citation format `[c12]`, refusal rule) → API (`POST /ask`, `/feedback`, `GET /docs/{id}`). Eval runner (`src/evalrunner`) loads gold JSONL, runs a YAML config through the pipeline, and writes `eval/results/<run_id>/`. Source layout: `src/{ingest,parse,chunk,embed,retrieve,generate,agent,api,evalrunner}`, `web/` (Next.js), `docker-compose.yml`.
+
+Key design decisions that span files:
+- **Gold evidence is a span** (`doc_id + parsed_sha256 + char_start/char_end + quote`), never a chunk id, so retrieval metrics stay chunker-independent. A retrieved chunk hits if it overlaps ≥50% of the gold span or contains it. Chunks must keep `doc_id, section_path, char_span, lang`.
+- Raw docs are stored with SHA-256; gold items pin `doc_sha256`, so re-fetched/changed documents invalidate labels.
+- LLM provider and embedding model sit behind interfaces so eval can compare them.
+- Stay on Postgres+pgvector unless measurements justify a dedicated vector DB.
+
+## Audit-driven decisions (docs revised 2026-10-31)
+
+- Index = labelled docs + unlabelled **distractor pool**; every results table includes `closed_book` and `long_context` baselines besides RAG.
+- Stats are **paired** (paired bootstrap/McNemar) with a power check; dataset floor 100 items/language. Judge–human agreement is reported per language.
+- Gold evidence carries `doc_sha256` (raw), `parsed_sha256`, `parser_version`, offsets AND verbatim `quote`; CI validates `quote == text[start:end]`. Parser change = new `parser_version` + re-anchor from quote.
+- Questions must not be written solely by the evidence picker (`source_kind`, `writer`); noisy/romanized variants link via `variant_of`.
+- LLM calls go through a hash-keyed response cache for reproducibility.
+- Week 1 is a parse-feasibility spike (legacy-font/scanned Hindi/Kannada PDFs) before sources are finalised.
+- Kafka/Spark scale demo and custom dashboard were cut. Security, PII, abuse/cost, observability and CI requirements live in `docs/11-security-and-ops.md`; project is a reference implementation, not a production service.
+
+## Data and schema
+
+- `data/schema/qa_item.schema.json` is the canonical QA item schema (langs `en|hi|kn`; qtypes include `unanswerable` and `cross_lingual`; `register` incl. romanized/noisy, `source_kind`, `variant_of`, evidence with parsed hash/parser version/quote). Validate gold data against it.
+- `data/labelling/labelling_sheet_template.csv` + `docs/04-labelling-guide.md` define the labelling workflow.
+- `data/corpus_manifest.csv` (source, URL, licence check, parse_status, role labelled|distractor, fetch date) is to be created in week 1; check licence/robots/terms (`docs/03-corpus-and-licensing.md`) before ingesting any source.
+- `data/raw/` and `data/processed/` are gitignored; `data/gold/` is published.
+
+## Eval conventions (docs/05-evaluation-plan.md)
+
+- Config: `eval/config.example.yaml` (run_name, dataset, seed, chunking, embedding, retrieval, generation, judge, `limits.max_cost_usd`). Model names there are placeholders marked "verify" — check current names before use.
+- Metrics: recall@k / MRR / nDCG@10 per language, qtype, difficulty; faithfulness, correctness, citation accuracy, language-match rate; abstention precision/recall on unanswerable items; latency p50/p95 and cost.
+- Ablations are one-factor-at-a-time from a fixed baseline (512-token fixed chunks, one multilingual embedding, dense top-5). Do NOT run the full cross product.
+- Judge model must be a different family than the generator; calibrate LLM-judge against human labels.
+
+## Constraints
+
+- Always show sources, valid-as-of date and a disclaimer in answers; never give legal/financial advice. Scrub PII before logging; documents are untrusted input (prompt injection).
+- Do not make claims (agents, published benchmark, user impact) in docs/README before the matching deliverable exists (local guidance in gitignored `private/`).
+- Python 3.11+, FastAPI, Pydantic, SQLAlchemy/psycopg; Next.js + TypeScript for web.

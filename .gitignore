@@ -1,0 +1,15 @@
+data/raw/
+data/processed/
+.env
+__pycache__/
+.venv/
+node_modules/
+eval/cache/
+eval/results/*/raw/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.DS_Store
+web/.next/
+private/

@@ -1,0 +1,14 @@
+run_name: baseline
+dataset: data/gold/qa_v0.1.jsonl
+distractor_pool: data/processed/distractors      # unlabelled docs added to the index
+seed: 42
+parser_version: "<pin>"
+chunking: {strategy: fixed, size_tokens: 512, overlap_tokens: 64, tokenizer: "<embedding model tokenizer>"}
+embedding: {provider: huggingface, model: "<verify: e.g. BAAI/bge-m3>"}
+retrieval: {mode: dense, k: 5}            # dense | lexical | hybrid_rrf | hybrid_rerank
+pipeline: rag                             # rag | closed_book | long_context  (baselines)
+generation: {provider: "<api|open>", model: "<verify current model name>", temperature: 0.0, answer_language: same_as_question, prompt_version: v1}
+judge: {provider: "<different family than generator>", rubric: eval/rubrics/faithfulness_v1.md}
+cache: {dir: eval/cache, mode: read_write}   # LLM responses keyed by hash(model, prompt, params)
+repeats: 3
+limits: {max_cost_usd: 5.0}
