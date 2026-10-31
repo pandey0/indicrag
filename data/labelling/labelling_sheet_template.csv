@@ -1,1 +1,1 @@
-id,lang,register,variant_of,source_kind,question,qtype,difficulty,answer,answerable,doc_id,doc_sha256,parsed_sha256,parser_version,char_start,char_end,quote,valid_as_of,writer,labeller,reviewer,review_status,notes
+id,lang,register,variant_of,source_kind,aligned_with,alignment_score,native_verified,question,qtype,difficulty,answer,answerable,doc_id,doc_sha256,parsed_sha256,parser_version,char_start,char_end,quote,valid_as_of,writer,labeller,reviewer,review_status,notes

@@ -29,6 +29,15 @@ Minimum 100 items/language for v0.1 (target 150 for v1.0). Target mix per langua
 ## Evidence spans
 Store `doc_id, doc_sha256 (raw), parsed_sha256, parser_version, char_start, char_end` AND the verbatim `quote` of the span. Offsets refer to the parsed text; the quote allows validation (CI checks quote == text[start:end]) and re-anchoring after parser upgrades. Minimal span that fully supports the answer.
 
+## Kannada protocol (aligned-parallel; no Kannada reader on the team)
+1. Only use document pairs where the publisher provides official Kannada and English versions of the same content (record the pair in the manifest: `pair_id`).
+2. Create the English item normally (question, answer, evidence span in the en doc).
+3. Locate the Kannada span automatically: embed the en span and candidate kn sentences/paragraphs (multilingual embedder), take the best match; store `alignment_score`.
+4. Kannada question = machine translation of the English question (LLM), `source_kind: aligned_parallel`, `aligned_with: <en id>`. Kannada answer = the aligned Kannada span text (extractive) rather than free-form generation.
+5. Automated consistency gates (no Kannada reading needed): numbers, dates, amounts and named entities in the en and kn spans must match after normalising Kannada/Devanagari/Arabic numerals; alignment_score above a threshold chosen on a verified sample; items failing are dropped.
+6. A native Kannada speaker checks a random sample (>=20% of items, at least 30) for question fluency, answer correctness and span correctness; set `native_verified: true` on checked items and report the error rate. If no native checker is found, ALL Kannada items stay `native_verified: false`, are marked experimental in the dataset card, and are excluded from headline claims.
+7. OCR'd Kannada documents cannot be hand-corrected by the team; use only if layer-vs-OCR agreement and the parallel English text give independent support, otherwise exclude.
+
 ## Difficulty
 easy (single sentence), medium (one section), hard (multi-span/multi-clause/cross-lingual).
 

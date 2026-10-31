@@ -29,9 +29,12 @@ Language correct, text extractable (not image-only), recent enough, stable URL, 
 - **Labelled set:** 30-60 documents, >=10 per language where available. Quality over volume.
 - **Distractor pool:** several hundred additional unlabelled docs (same licence rules) including sibling schemes with overlapping wording, older versions of the same page, and same-topic docs in other languages. Without it retrieval is trivially easy and ablations show nothing. Pool docs are indexed but never used for questions.
 
+## Kannada source rule
+Kannada documents enter the labelled set only as part of an official kn/en parallel pair (manifest column `pair_id`). Kannada-only documents may be used as distractors, not for questions.
+
 ## Parse-feasibility spike (week 1, before finalising sources)
 Many Hindi/Kannada government PDFs use legacy non-Unicode fonts (extract as garbage), are scanned images, or hide content in tables. For each candidate: extract text, eyeball 3 passages, record `parse_status` (ok / needs_ocr / legacy_font / broken_text / ocr_ok / ocr_poor / fail / fetch_failed) in the manifest. Week-1 results: `docs/12-week1-parse-findings.md`. Prefer HTML and Unicode-text PDFs. Decide OCR go/no-go from the failure rate; OCR output quality must be spot-checked before labelling on it.
 
 ## Redistribution fallback
 If text cannot be redistributed: release labels, spans, verbatim `quote`s (check they are short enough to be fair use / permitted), URLs, hashes, fetch scripts, and Internet Archive snapshot URLs where permitted. Many government sites carry no explicit licence: do not assume 'public' means 'reusable'; read the site's content/copyright policy and record the quote of the clause in `notes`.
-Add manifest columns: `parse_status, role (labelled|distractor), snapshot_url`.
+Add manifest columns: `parse_status, role (labelled|distractor), snapshot_url, pair_id`.

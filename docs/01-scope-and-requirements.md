@@ -7,6 +7,11 @@ G3. Provide a deployed reference app (citations, language handling, feedback).
 G4. Provide an agent layer with tools, evaluated on tool-call and trajectory quality.
 G5. Publish findings (results table, failure analysis, blog).
 
+## Language coverage policy
+The author reads/writes English and Hindi (to be confirmed per labelling session); no Kannada reader/writer is currently on the project. Therefore:
+- **en, hi:** natively labelled by the author (hi: reviewed by a second Hindi reader on a sample).
+- **kn:** **aligned-parallel only**: Kannada items are derived from English items where an official Kannada/English parallel document exists, via cross-lingual span alignment, with automated consistency checks and a native-speaker check on a sample. Kannada results are always reported as a separate slice labelled "aligned, partially verified"; they are never described as natively authored. No native-register Kannada (colloquial, code-mixed, romanized) items unless a native annotator joins.
+
 ## Non-goals (v1)
 Model training or fine-tuning; voice/ASR/TTS; user accounts or PII; legal/financial advice; scraping sources whose terms forbid it; claims of production usage.
 

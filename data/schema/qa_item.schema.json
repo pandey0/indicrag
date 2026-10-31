@@ -139,12 +139,26 @@
       "enum": [
         "hand_written",
         "llm_drafted_validated",
-        "real_query"
+        "real_query",
+        "aligned_parallel"
       ]
     },
     "writer": {
       "type": "string",
       "description": "who wrote the question; should differ from the person who selected the evidence where possible"
+    },
+    "aligned_with": {
+      "type": "string",
+      "description": "for aligned_parallel items: id of the source-language (usually en) item this item was derived from"
+    },
+    "native_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "true only if a native speaker of the item's language checked question, answer and span"
+    },
+    "alignment_score": {
+      "type": "number",
+      "description": "cross-lingual span alignment similarity (0-1) for aligned_parallel items"
     }
   }
 }

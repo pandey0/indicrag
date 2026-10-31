@@ -18,6 +18,7 @@
 | Legacy-font / scanned Indic PDFs | silent garbage text, bad labels | week-1 parse spike, parse_status, golden parser tests, OCR spot-checks |
 | Judge unreliable in Kannada | misleading numbers | per-language judge-human agreement; fall back to human scoring |
 | Underpowered comparisons | false conclusions | paired stats, power check, report 'no evidence of difference' |
+| No Kannada reader on the team | Kannada labels/OCR/judge unverifiable | aligned-parallel protocol, automated consistency gates, native sample check, separate unverified slice, no headline claims (docs/04) |
 | Other company's IP | legal/ethical | this project uses only public sources and personal time/equipment; no employer or client code or data |
 
 ## Responsible release

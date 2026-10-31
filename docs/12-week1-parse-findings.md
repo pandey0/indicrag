@@ -24,9 +24,12 @@ Run: `scripts/week1_parse_spike.py` over `data/spike_candidates.csv` (32 public 
 - Licence verdicts in manifest: **not met** (parse status recorded; licence review pending).
 - >=5 usable docs per language: technically met for en/hi/kn, but **Hindi and Kannada usable-content volume is low**: Hindi has no citizen-scheme Q&A source yet (RTI portal and Bihar service list only); Kannada has Seva Sindhu plus thin department pages.
 
+## Constraint discovered after this run
+The author cannot read or write Kannada. Kannada is therefore handled as aligned-parallel text only (see `docs/01` language coverage policy and `docs/04` Kannada protocol). Candidate Kannada sources must come in official kn/en pairs; the Karnataka School Education pages (kn/en) and Ahara citizen charter (kn/en PDFs, OCR) qualify; Seva Sindhu and the Kannada RTI manual need an English counterpart to be useful.
+
 ## Decisions / next steps
 1. Add main-content extraction + a content-density metric; re-score the HTML candidates.
 2. Hindi remains the weak spot: look for Hindi-native scheme/service content (more state portals, department FAQs, Hindi PDFs via OCR), possibly accepting OCR'd Hindi government documents as the main Hindi source. If Hindi cannot reach a usable corpus, the roadmap's pivot applies (ship en+kn, or hi via OCR with documented error rate).
-3. Measure OCR error on a hand-corrected sample (3 pages per language) before labelling on OCR text; calibrate the layer-vs-OCR threshold on a good Indic PDF.
+3. Measure OCR error on a hand-corrected sample (3 pages for Hindi, by the author; **Kannada cannot be hand-corrected by the team**: use a native checker or rely on kn/en parallel text and layer-vs-OCR agreement); calibrate the layer-vs-OCR threshold on a good Indic PDF.
 4. Licence/terms review for every candidate (read each site's content policy, record the clause in `notes`), then set `allow/deny`. This needs a human decision.
 5. Promote fetch/parse logic into `src/ingest` and `src/parse` with golden tests on short fixtures; add a headless-render fetcher for JS sites (myScheme).

@@ -10,7 +10,7 @@ Government portals, banks and support desks in India need assistants that answer
 IndicRAG asks: *given real public-service documents, how well do different RAG designs work in three languages, and where do they fail?*
 
 ## What it delivers
-1. **Dataset:** question / answer / evidence-span items in hi, kn, en (target 150 per language, minimum 100), including unanswerable, colloquial, romanized and code-mixed questions. Released with a dataset card.
+1. **Dataset:** question / answer / evidence-span items in hi and en (target 150 per language, minimum 100) plus a Kannada slice derived from official kn/en parallel documents (aligned and partially native-verified, reported separately), including unanswerable, colloquial, romanized and code-mixed questions. Released with a dataset card.
 2. **Evaluation harness:** reproducible runs from a YAML config; retrieval, faithfulness, citation, abstention, robustness and cost metrics, with paired statistics.
 3. **Reference app:** FastAPI + Next.js. Every answer shows cited passages, the source's valid-as-of date and a "not official advice" notice.
 4. **Agent layer:** tool-calling agent for eligibility / document-list tasks, evaluated on task success and tool-call accuracy against plain RAG.
@@ -66,7 +66,7 @@ Not available yet. Planned: retrieval and generation tables per language, baseli
 - No model training, no voice, no collection of personal data.
 
 ## Author
-Arpit Pandey: building this end to end (data engineering, evaluation, backend, frontend, agents). Fluent in Hindi, Kannada and English, which is what makes native-quality Kannada labels possible.
+Arpit Pandey: building this end to end (data engineering, evaluation, backend, frontend, agents). Each language's labels need a native-speaker annotator; who labelled and reviewed what will be credited in the dataset card (`docs/04-labelling-guide.md`).
 
 ## Contributing
 Corrections to labels, new sources with clear licences, and Hindi/Kannada reviewers are welcome once the dataset is public; open an issue.

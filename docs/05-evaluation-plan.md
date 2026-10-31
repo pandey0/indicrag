@@ -42,6 +42,8 @@ Do NOT run the full cross product: one-factor-at-a-time from rag_baseline, then 
 - Different model family than the generator, written rubric (`eval/rubrics/`), prompt version recorded.
 - Judge validity is measured PER LANGUAGE (Hindi, Kannada, English separately): human-labelled sample of >=30 items/language (>=15% minimum), report judge-human agreement (Cohen's kappa / accuracy). If Kannada agreement is poor, say so and fall back to human scoring or extractive metrics for Kannada rather than reporting unreliable judge scores.
 - Never report judge scores without the agreement figure next to them.
+- Kannada: the team cannot read Kannada, so judge validity there depends on a native-speaker sample. Without one, Kannada generation quality is reported only with extractive/overlap metrics and flagged unverified; retrieval metrics (span-based) remain valid.
+- Kannada slice (aligned-parallel items) is reported separately with its `native_verified` fraction; do not pool it with hi/en headline numbers.
 
 ## Reproducibility
 - LLM calls go through a response cache keyed by hash(provider, model, prompt, params); cache dir `eval/cache/` (gitignored) with a committed small cache for the CI smoke set. Re-running with cache gives bit-identical results; `--no-cache` re-measures variance.

@@ -11,6 +11,7 @@
 | API + minimal UI + report page + security/ops controls | 18 |
 | Agent + task set + eval | 7 |
 | Dataset v1.0 card, release, blog | 6 |
+Kannada items are derived by alignment (cheap for the team) but need a native-speaker sample check (~3-4 h of an outside person's time, not counted here).
 Total ~112 h: no slack. Anything extra (dashboard, scale demo, more items) displaces something above. Pre-decided cuts, in order: (1) v1.0 stays at 100 items/lang, (2) agent shrinks to eligibility-only tasks, (3) drop Kannada cross-lingual items.
 
 ## Phase 1: Data + eval (weeks 1-4)
@@ -36,7 +37,7 @@ Mon-Thu 30-60 min; weekends 3-4 h block. `JOURNAL.md`: one paragraph/week (shipp
 
 ## Kill / pivot criteria (explicit)
 - Licensing blocks redistribution of text: release labels + spans + quotes + fetch scripts + archived snapshot URLs only.
-- Kannada parsing infeasible: ship Hindi+English v1, Kannada as documented follow-up.
+- No native Kannada checker found, or no usable kn/en parallel pairs: ship Hindi+English v1; Kannada as an experimental, unverified slice or documented follow-up.
 - Labelling slower than 6 items/hour at quality: use LLM-drafted + validated items, cut cross-lingual.
 - API cost over budget: open models + smaller judge sample (never skip judge calibration).
 - Time shortage: stop after phase 2; still a complete, evaluated project.

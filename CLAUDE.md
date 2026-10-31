@@ -30,6 +30,9 @@ Key design decisions that span files:
 - Week 1 is a parse-feasibility spike (legacy-font/scanned Hindi/Kannada PDFs) before sources are finalised.
 - Kafka/Spark scale demo and custom dashboard were cut. Security, PII, abuse/cost, observability and CI requirements live in `docs/11-security-and-ops.md`; project is a reference implementation, not a production service.
 
+## Language policy (important)
+Author reads/writes en (and hi, to be confirmed) but **not Kannada**. Kannada items are aligned-parallel only (official kn/en pairs, `source_kind: aligned_parallel`, `aligned_with`, `alignment_score`, `native_verified`), reported as a separate unverified slice, never described as natively authored. Never claim fluency or native-quality Kannada labels anywhere. See `docs/01`, `docs/04`.
+
 ## Data and schema
 
 - `data/schema/qa_item.schema.json` is the canonical QA item schema (langs `en|hi|kn`; qtypes include `unanswerable` and `cross_lingual`; `register` incl. romanized/noisy, `source_kind`, `variant_of`, evidence with parsed hash/parser version/quote). Validate gold data against it.
