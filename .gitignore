@@ -13,3 +13,4 @@ eval/results/*/raw/
 .DS_Store
 web/.next/
 private/
+data/.ingest.lock

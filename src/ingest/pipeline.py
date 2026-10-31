@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import fcntl
 import json
 import logging
 import subprocess
@@ -54,10 +55,12 @@ def parse_one(raw: bytes, is_pdf: bool, lang: str, cfg: Config, use_ocr: bool = 
         m = compute_metrics(text, doc.pages, fonts)
         status, reason = classify(m, lang, "pdf")
         if status == "ok" and lang in ("hi", "kn") and tess:
-            best = max(range(doc.pages), key=lambda i: len(fitz.open(stream=raw, filetype="pdf")[i].get_text()))
             from ..parse.ocr import ocr_page_png, render_page
+            pdf = fitz.open(stream=raw, filetype="pdf")   # keep a reference: pages die with their document
+            layers = [pdf[i].get_text() for i in range(pdf.page_count)]
+            best = max(range(len(layers)), key=lambda i: len(layers[i]))
             o = ocr_page_png(tess, render_page(raw, best), lang)
-            agree = layer_ocr_agreement(fitz.open(stream=raw, filetype="pdf")[best].get_text(), o, lang)
+            agree = layer_ocr_agreement(layers[best], o, lang)
             if agree < cfg.agreement_threshold:
                 status, reason = "broken_text", f"text layer disagrees with OCR (word overlap {agree:.2f})"
         if status in ("needs_ocr", "legacy_font", "broken_text"):
@@ -84,6 +87,12 @@ def parse_one(raw: bytes, is_pdf: bool, lang: str, cfg: Config, use_ocr: bool = 
 def run(sources_path: Path, cfg: Config | None = None, only: set[str] | None = None, refresh: bool = False,
         reparse: bool = False, use_ocr: bool = True, limit: int | None = None) -> dict[str, dict]:
     cfg = cfg or Config()
+    cfg.data_dir.mkdir(parents=True, exist_ok=True)
+    lock = open(cfg.data_dir / ".ingest.lock", "w")   # one run at a time: the manifest is read-modify-write
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        raise SystemExit("another ingest run holds data/.ingest.lock; wait for it to finish")
     manifest = read_manifest(cfg.manifest_path)
     sources = load_sources(sources_path, only)[: limit or None]
     pv = parser_version(cfg)
