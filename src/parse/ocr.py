@@ -27,7 +27,10 @@ def ocr_page_png(binary: str, png: bytes, lang: str, timeout: int = 300) -> str:
     with tempfile.NamedTemporaryFile(suffix=".png") as tf:
         tf.write(png)
         tf.flush()
-        res = subprocess.run([binary, tf.name, "-", "-l", LANGS[lang], "--psm", "3"], capture_output=True, text=True, timeout=timeout)
+        try:
+            res = subprocess.run([binary, tf.name, "-", "-l", LANGS[lang], "--psm", "3"], capture_output=True, text=True, timeout=timeout)
+        except subprocess.TimeoutExpired:   # one stuck page must not kill the whole run; page is left empty
+            return ""
         return res.stdout
 
 

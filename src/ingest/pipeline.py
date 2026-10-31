@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import json
 import logging
+import subprocess
 from collections import defaultdict
 from dataclasses import asdict
 from datetime import datetime, timezone
@@ -132,7 +133,7 @@ def run(sources_path: Path, cfg: Config | None = None, only: set[str] | None = N
                 row.update(parse_status=c["status"], title=c["title"][:200] or row.get("title", ""), pages=c["pages"],
                            ocr_used=str(c["ocr_used"]).lower(), parser_version=pv, notes=(row.get("notes", "") + " | " + c["reason"]).strip(" |"))
                 log.info("%d/%d %-28s %-12s %s", i, len(sources), sid, c["status"], c["reason"][:80])
-            except (requests.RequestException, ValueError, OSError) as e:   # TLS errors are recorded, never bypassed
+            except (requests.RequestException, ValueError, OSError, subprocess.SubprocessError) as e:   # TLS errors are recorded, never bypassed
                 row.update(parse_status="fetch_failed", notes=f"{type(e).__name__}: {str(e)[:150]}")
                 log.warning("%d/%d %-28s fetch_failed %s", i, len(sources), sid, str(e)[:80])
             if i % 5 == 0:
