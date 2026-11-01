@@ -1,85 +1,69 @@
 # IndicRAG
 
-**A Hindi / English benchmark and reference system for retrieval-augmented question answering (RAG) over Indian citizen-service documents, with a tool-using agent layer.**
+Retrieval-augmented question answering over Indian citizen-service documents (schemes, pensions, ID, tax, insurance), in **Hindi and English**. It has an evaluation harness with span-level gold evidence, a cited-answer API and web UI, and a small eligibility agent compared against plain RAG.
 
-> **Status: pipeline implemented, dataset labelling in progress, no results yet.** Implemented and tested (CI): ingestion with OCR, chunking, BM25 / dense / hybrid retrieval, retrieval metrics with paired bootstrap, a gold-data validator, a cited-answer generator with refusal, PII scrubbing, and a FastAPI reference app with a minimal web UI, and an eligibility-focused agent core (deterministic rule engine, validated tools, budgeted loop with traces; untested against a real model). Not yet done: the human-validated gold set (the current bottleneck), LLM answer evaluation and the agent. First small-n results are in `eval/RESULTS.md`.
+The goal is to *measure* whether answers are correct, grounded and in the right language, and to report the numbers with their limits.
 
-## Problem
-Government portals, banks and support desks in India need assistants that answer in Hindi and English. Teams building them struggle to *measure* whether answers are correct, grounded in sources, and in the right language. Most RAG demos ship with no measurements, and regional-language evaluation data is limited (to be confirmed by a literature review, see `docs/10-references.md`).
+> **Status: working system, early measurements, dataset not yet released.** 75 human-validated pilot questions (45 English, 30 Hindi), one reviewer. At this size most differences between retrieval methods are within noise. See [Results](#results) before quoting any number.
 
-IndicRAG asks: *given real public-service documents, how well do different RAG designs work in three languages, and where do they fail?*
+## What is in the repo
 
-## What it delivers
-1. **Dataset:** question / answer / evidence-span items in hi and en (target 150 per language, minimum 100), including unanswerable, colloquial, romanized and code-mixed questions. Released with a dataset card.
-2. **Evaluation harness:** reproducible runs from a YAML config; retrieval, faithfulness, citation, abstention, robustness and cost metrics, with paired statistics.
-3. **Reference app:** FastAPI + Next.js. Every answer shows cited passages, the source's valid-as-of date and a "not official advice" notice.
-4. **Agent layer:** tool-calling agent for eligibility / document-list tasks, evaluated on task success and tool-call accuracy against plain RAG.
-
-## How it works
-```
-Public docs (HTML/PDF)                       Gold labels (QA + evidence spans)
-      |                                                  |
- [Ingest] -> [Parse/Clean] -> [Chunk] -> [Embed] -> Postgres + pgvector
-                                                       |            |
-                                             [Eval runner] <-> [RAG service (FastAPI)]
-                                                       |            |
-                                          results + report     [Web UI (Next.js)]
-                                                                    |
-                                                             [Agent layer]
-```
-Design points that matter:
-- **Span-level gold evidence** (with verbatim quote and parser/version hashes), so retrieval is scored fairly across different chunking strategies.
-- **Distractor pool:** extra unlabelled documents in the index so retrieval is not trivially easy.
-- **Honest baselines:** every table includes closed-book and long-context baselines, not just RAG variants.
-- **Paired statistics + power check** instead of eyeballing small differences.
-- **Per-language LLM-judge validation** against human labels; judge scores are never reported alone.
-- **Controls for a public demo:** rate limits, budget cap, PII scrubbing, prompt-injection tests (`docs/11-security-and-ops.md`).
-
-## Roadmap (12 weeks)
-| Phase | Weeks | Deliverables |
+| Component | Where | State |
 |---|---|---|
-| 1 Data + eval | 1-4 | corpus manifest with licence checks, parse-feasibility study, ingestion pipeline, dataset v0.1, baseline retrieval + generation metrics |
-| 2 App | 5-8 | FastAPI service, minimal UI with citations and feedback, ablations, deployed demo, results report |
-| 3 Agent + release | 9-12 | tool-calling agent and evaluation, dataset v1.0 on Hugging Face, write-up |
-Details, gates and pivot criteria: `docs/06-roadmap-12-weeks.md`.
+| Polite ingestion (HTML, PDF, headless render, OCR), content-addressed storage, licence-aware manifest | `src/ingest`, `src/parse` | working, tested |
+| Chunking (fixed / heading), OCR-noise gate, span-hit rule | `src/chunk` | working, tested |
+| Retrieval: BM25 (word, char n-gram), dense (multilingual-e5-small, bge-m3), hybrid RRF | `src/retrieve`, `src/embed` | working, tested |
+| Eval harness: gold validator, recall@k / MRR / nDCG, paired bootstrap, generation scoring | `src/evalrunner` | working, tested |
+| Cited-answer generation with citation validation and refusal; PII scrubbing | `src/generate`, `src/security` | working, tested |
+| FastAPI service (`/ask`, `/feedback`, `/docs/{id}`, health) with rate limit, budget cap, kill switch; Next.js UI | `src/api`, `web/` | working, browser smoke test |
+| Eligibility agent: deterministic rules engine, validated read-only tools, budgeted loop with JSON traces | `src/agent` | working; no advantage over RAG measured |
+| pgvector schema, Docker Compose, CI | `db/`, `docker-compose.yml`, `.github/` | working |
 
-## Tech stack
-Python 3.11+, FastAPI, Pydantic, Postgres + pgvector, multilingual open embedding models (e.g. BGE-M3, multilingual-e5), pluggable LLM providers (API + open model), Next.js + TypeScript, Docker Compose, GitHub Actions, OpenTelemetry. Model choices are verified at implementation time.
+100 tests pass; `ruff` is clean.
 
-## Repository layout
-```
-docs/        design: scope, architecture, corpus & licensing, labelling guide, evaluation plan,
-             roadmap, agent phase, risks & ethics, references, security & ops
-data/        schema/, labelling template, corpus_manifest.csv (raw/processed gitignored; gold published)
-eval/        config.example.yaml, results/ (summary tables only)
-src/         ingest, parse, chunk, embed, retrieve, generate, security, api, evalrunner  (implemented); agent (planned)
-web/         Next.js 16 / TypeScript UI (ask, cited sources, feedback, disclaimer); browser smoke test in web/e2e
-```
-
-## Run locally
-```
-pip install -r requirements-api.txt && make ingest-myscheme   # corpus stays local (not redistributed)
-make chunk && make api                                        # retrieval-only unless ANTHROPIC_API_KEY is set
-cd web && npm ci && npm run dev                               # UI on :3000, proxies /api to :8000
-# or: CLIENT_SALT=$(openssl rand -hex 8) docker compose up --build
-make test
-```
-The corpus is fetched by the ingest scripts under each source's terms and is never committed or baked into images.
+## Design choices that matter
+- **Gold evidence is a span, not a chunk id** (document hash, parsed-text hash, parser version, character offsets, verbatim quote). A retrieved chunk hits if it contains the span or overlaps it by at least half, so chunking strategies are compared fairly. The validator checks `quote == text[start:end]`.
+- **Distractors:** the index holds the whole local corpus (about 2,400 chunks from roughly 400 documents), so every query competes against all documents.
+- **Baselines next to RAG:** closed-book, and an oracle with the whole gold document in context. A true whole-corpus long-context run is not done (the corpus is about 1M tokens).
+- **No same-family judge.** Generation is scored by number recall against the gold answer, which is objective but weak; faithfulness and fluency are not scored yet.
+- **Paired statistics** (paired bootstrap) with the number of comparisons stated.
+- **Documents are untrusted input:** 24 prompt-injection cases, PII scrubbing before logging, no personal data stored.
 
 ## Results
-Early, small-n measurements are in [`eval/RESULTS.md`](eval/RESULTS.md): 75 human-validated pilot items (English and Hindi), six retrieval configurations, a RAG vs closed-book generation test, injection tests and an agent comparison. At this sample size the retrieval configurations are statistically indistinguishable (all place the gold passage in the top 5 for 93-97% of items); retrieval clearly helps generation (closed-book number recall 0.60 vs 0.94 with retrieval), but the Hindi slice is partly guessable from model knowledge, and an agent showed no advantage over plain RAG on the tasks tried. The gold set is not released and these numbers are not a benchmark yet.
+Full tables and caveats: [`eval/RESULTS.md`](eval/RESULTS.md). Headline, on 71 answerable items:
 
-## Scope, limitations and responsible use
-- Uses only public documents whose licence/terms permit it; the licence decision for each source is recorded in the manifest. Text is redistributed only where allowed; otherwise labels, spans and fetch scripts are released.
-- A reference implementation with measured quality and basic abuse/privacy controls, **not** a production service (no authentication, multi-tenancy or SLA).
-- Not legal, financial or official eligibility advice. Government rules change; answers carry the source's valid-as-of date.
+- **Retrieval:** all six configurations put the gold passage in the top 5 for 93-97% of items; recall@1 ranges from 0.62 to 0.73. Only one of 15 pairs (e5 hybrid over e5 dense) has an interval excluding zero, and the gap does not appear with bge-m3. I do not claim any method is better.
+- **Generation (claude-haiku-5-5):** number recall 0.94 with retrieval vs 0.60 closed-book (paired difference +0.34, 95% CI +0.22 to +0.48). With the whole gold document in context: 0.95. Abstention on four unanswerable questions: 4/4.
+- **Hindi caveat:** closed-book Hindi recall is 0.88 because many items concern well-known national schemes, so the Hindi slice tests retrieval less than the English one.
+- **Agent:** on 30 easy single-document eligibility tasks, plain RAG 29/30 vs agent 26/30 (all agent misses were the token budget). No advantage shown.
+- **Injection:** 0-2 of 24 cases flagged by an upper-bound check; flagged answers read as reporting, not obeying, the injection.
+
+Limits: one reviewer, no agreement statistic; questions were LLM-drafted from passages and then validated, so they share vocabulary with their evidence (this favours lexical retrieval); the Hindi corpus is mostly Wikipedia while English is mostly myScheme pages, so the languages are different kinds of test.
+
+## Quick start
+```
+python3 -m venv .venv && .venv/bin/pip install -r requirements-api.txt
+make ingest-myscheme            # fetch the corpus locally (not redistributed)
+make chunk && make api          # retrieval-only unless ANTHROPIC_API_KEY is set
+cd web && npm ci && npm run dev   # UI on :3000, proxies /api to :8000
+make test
+```
+Dense retrieval needs `requirements-embed.txt`. `make results GOLD=...` reproduces the retrieval tables if you have a gold file. Docker: `CLIENT_SALT=$(openssl rand -hex 8) docker compose up --build`. The corpus is fetched under each source's terms and is never committed or baked into images.
+
+## Data and licensing
+- The raw corpus and the gold set stay local and gitignored. Nothing is published until each source's licence has been reviewed by a human (`docs/03-corpus-and-licensing.md`). Wikipedia text is CC BY-SA 4.0.
+- Dataset card draft: `docs/17-dataset-card-draft.md`. Labelling guide: `docs/04-labelling-guide.md`.
+
+## Limitations and responsible use
+- A reference implementation, **not** a production service: no authentication, multi-tenancy or SLA.
+- Not legal, financial or official eligibility advice. Rules change; answers carry the source's valid-as-of date, and some gold answers reflect an older version of a scheme.
 - No model training, no voice, no collection of personal data.
 
-## Author
-Arpit Pandey: building this end to end (data engineering, evaluation, backend, frontend, agents). Each language's labels need a native-speaker annotator; who labelled and reviewed what will be credited in the dataset card (`docs/04-labelling-guide.md`).
-
-## Contributing
-Corrections to labels, new sources with clear licences, and Hindi reviewers (and native Kannada reviewers, should Kannada be added) are welcome once the dataset is public; open an issue.
-
 ## Scope decision: Kannada is out of v1
-Kannada was an original goal. It is deferred because the project has no native Kannada reader to validate questions or answers, and unvalidated Kannada labels would not support honest claims. The Kannada documents already fetched, and the tooling for English-Kannada alignment with a native-speaker check (`scripts/align_kn_candidates.py`, `src/evalrunner/align.py`), remain in the repository as groundwork. No result in this repository covers Kannada. Adding it needs a native Kannada validator; see `docs/01-scope-and-requirements.md`.
+Kannada was an original goal. It is deferred because the project has no native Kannada reader to validate questions or answers. The fetched Kannada documents and the English-Kannada alignment tooling (`scripts/align_kn_candidates.py`, `src/evalrunner/align.py`) remain as groundwork. No result here covers Kannada.
+
+## Docs
+Design and plans live in `docs/`: scope (`01`), architecture (`02`), evaluation plan (`05`), security and ops (`11`), parse findings (`12`), chunking (`13`), retrieval (`14`), app (`15`), agent (`16`).
+
+## Author
+Arpit Pandey: data engineering, evaluation, backend, frontend and agents. Contributions welcome: label corrections, sources with clear licences, and Hindi reviewers. Open an issue.
