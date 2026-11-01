@@ -52,3 +52,17 @@ def test_resume_skips_done_and_quit_saves(tmp_path):
 def test_invalid_edit_not_saved(tmp_path):
     stats, gold = run(tmp_path, ["e", "Q?", "Within 99 days.", "s", "s"])
     assert stats["revised"] == 0 and not (gold / "dev.jsonl").exists()      # answer number 99 not in quote -> validator blocks
+
+
+def test_batch_decisions_non_interactive(tmp_path):
+    from review_drafts import apply_decisions, parse_decisions
+    items, man = setup(tmp_path)
+    d = parse_decisions("q1=a, q2=e:Where should I apply?::At the block office., q3=r")
+    assert d["q2"] == ("e", "Where should I apply?", "At the block office.")
+    stats = apply_decisions(items, d, "t", out=lambda *_: None, manifest=str(man), data_dir=str(tmp_path), gold_dir=tmp_path / "g")
+    assert stats["agreed"] == 1 and stats["revised"] == 1 and stats["rejected"] == 1
+    try:
+        apply_decisions(items, parse_decisions("q1=a"), "t", out=lambda *_: None, manifest=str(man), data_dir=str(tmp_path), gold_dir=tmp_path / "g")
+        raise AssertionError("expected not-pending error")
+    except ValueError as e:
+        assert "not pending" in str(e)

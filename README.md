@@ -2,7 +2,7 @@
 
 **A Hindi / Kannada / English benchmark and reference system for retrieval-augmented question answering (RAG) over Indian citizen-service documents, with a tool-using agent layer.**
 
-> **Status: pipeline implemented, dataset labelling in progress, no results yet.** Implemented and tested (CI): ingestion with OCR, chunking, BM25 / dense / hybrid retrieval, retrieval metrics with paired bootstrap, a gold-data validator, a cited-answer generator with refusal, PII scrubbing, and a FastAPI reference app with a minimal web UI, and an eligibility-focused agent core (deterministic rule engine, validated tools, budgeted loop with traces; untested against a real model). Not yet done: the human-validated gold set (the current bottleneck), LLM answer evaluation and the agent. Results will be added to `eval/RESULTS.md` only when they exist.
+> **Status: pipeline implemented, dataset labelling in progress, no results yet.** Implemented and tested (CI): ingestion with OCR, chunking, BM25 / dense / hybrid retrieval, retrieval metrics with paired bootstrap, a gold-data validator, a cited-answer generator with refusal, PII scrubbing, and a FastAPI reference app with a minimal web UI, and an eligibility-focused agent core (deterministic rule engine, validated tools, budgeted loop with traces; untested against a real model). Not yet done: the human-validated gold set (the current bottleneck), LLM answer evaluation and the agent. First small-n results are in `eval/RESULTS.md`.
 
 ## Problem
 Government portals, banks and support desks in India need assistants that answer in Hindi, Kannada and English. Teams building them struggle to *measure* whether answers are correct, grounded in sources, and in the right language. Most RAG demos ship with no measurements, and regional-language evaluation data is limited (to be confirmed by a literature review, see `docs/10-references.md`).
@@ -67,7 +67,7 @@ make test
 The corpus is fetched by the ingest scripts under each source's terms and is never committed or baked into images.
 
 ## Results
-Not available yet. Planned: retrieval and generation tables per language, baseline comparisons, failure taxonomy, judge-human agreement, latency and cost.
+Early, small-n measurements are in [`eval/RESULTS.md`](eval/RESULTS.md) (41 human-validated pilot items; English and Hindi only, no Kannada yet). Headline, with caveats stated there: hybrid retrieval beat dense-only retrieval (paired 95% CI excludes 0); no other retriever difference is distinguishable at this sample size. The gold set is not released and these numbers are not a benchmark yet.
 
 ## Scope, limitations and responsible use
 - Uses only public documents whose licence/terms permit it; the licence decision for each source is recorded in the manifest. Text is redistributed only where allowed; otherwise labels, spans and fetch scripts are released.

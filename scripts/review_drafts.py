@@ -38,7 +38,11 @@ def review(items: list[dict], reviewer: str, ask=input, out=print, manifest="dat
         out("QUESTION: " + it["question"])
         out("ANSWER:   " + it["answer"])
         while True:
-            k = ask("[a]gree [r]eject [e]dit [s]kip [q]uit > ").strip().lower()
+            try:
+                k = ask("[a]gree [r]eject [e]dit [s]kip [q]uit > ").strip().lower()
+            except EOFError:
+                out("no interactive input available (stdin closed): use --list / --decide for the non-interactive flow")
+                k = "q"
             if k in {"a", "r", "e", "s", "q"}:
                 break
         if k == "q":
@@ -72,12 +76,59 @@ def review(items: list[dict], reviewer: str, ask=input, out=print, manifest="dat
     return stats
 
 
+def pending(items: list[dict], gold_dir: Path = GOLD) -> list[dict]:
+    done_file = gold_dir / ".reviewed"
+    done = set(done_file.read_text().split()) if done_file.exists() else set()
+    return [i for i in items if i["id"] not in done and i.get("review_status") == "unreviewed" and i["lang"] != "kn"]
+
+
+def parse_decisions(spec: str) -> dict[str, tuple[str, str, str]]:
+    """'id=a, id=r, id=s, id=e:new question::new answer' (comma/newline separated; edit text may not contain a comma-then-id)."""
+    out = {}
+    for part in [p.strip() for p in spec.replace("\n", ",").split(",") if p.strip()]:
+        iid, _, rest = part.partition("=")
+        if rest[:1] == "e" and ":" in rest:
+            q, _, a = rest[2:].partition("::")
+            out[iid.strip()] = ("e", q.strip(), a.strip())
+        elif rest[:1] in {"a", "r", "s"}:
+            out[iid.strip()] = (rest[:1], "", "")
+        else:
+            raise ValueError(f"bad decision {part!r}")
+    return out
+
+
+def apply_decisions(items: list[dict], decisions: dict, reviewer: str, **kw) -> dict:
+    """Run the same review() logic non-interactively: only items named in decisions are touched."""
+    todo = [i for i in pending(items, kw.get("gold_dir", GOLD)) if i["id"] in decisions]
+    unknown = set(decisions) - {i["id"] for i in todo}
+    if unknown:
+        raise ValueError(f"not pending/unknown ids: {sorted(unknown)}")
+    script: list[str] = []
+    for i in todo:
+        k, q, a = decisions[i["id"]]
+        script += [k] + ([q, a] if k == "e" else [])
+    it = iter(script)
+    return review(todo, reviewer, ask=lambda _: next(it), **kw)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("files", nargs="+")
-    ap.add_argument("--reviewer", required=True)
+    ap.add_argument("--reviewer", default="")
+    ap.add_argument("--list", type=int, metavar="N", help="print the next N pending items compactly and exit")
+    ap.add_argument("--decide", help="decisions 'id=a,id=r,id=e:new q::new a,id=s' applied non-interactively")
     a = ap.parse_args()
     items = [json.loads(line) for f in a.files for line in open(f, encoding="utf-8") if line.strip()]
+    if a.list:
+        for i in pending(items)[: a.list]:
+            print(f"{i['id']} [{i['lang']},{i['qtype']}]\n  QUOTE: {i['evidence'][0]['quote'][:420]}\n  Q: {i['question']}\n  A: {i['answer']}\n")
+        print(f"({len(pending(items))} pending)")
+        return
+    if not a.reviewer:
+        ap.error("--reviewer is required")
+    if a.decide:
+        apply_decisions(items, parse_decisions(a.decide), a.reviewer)
+        return
     review(items, a.reviewer)
 
 

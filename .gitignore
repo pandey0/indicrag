@@ -24,3 +24,6 @@ data/labelling/pilot_sheet_twins.csv
 data/agent/
 data/labelling/pilot_sheet_ms.csv
 data/labelling/pilot_sheet_hi2.csv
+data/gold/dev.jsonl
+data/gold/.reviewed
+data/gold/rejected.jsonl
