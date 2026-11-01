@@ -11,7 +11,8 @@ from bs4 import BeautifulSoup, Comment, Doctype, NavigableString, Tag
 HEADINGS = {"h1": 1, "h2": 2, "h3": 3, "h4": 4, "h5": 5, "h6": 6}
 DROP_TAGS = ["script", "style", "noscript", "svg", "iframe", "nav", "footer", "aside", "form", "button", "select", "option"]
 BOILER_ATTR = re.compile(r"(^|[\s_-])(nav|navbar|menu|footer|breadcrumb|sidebar|cookie|accessib|skip|social|sitemap|"
-                         r"font-?size|screen-?reader|language-?switch|lang-?select|modal|popup|toolbar)([\s_-]|$)", re.I)
+                         r"font-?size|screen-?reader|language-?switch|lang-?select|modal|popup|toolbar|"
+                         r"references?|reflist|navbox|catlinks|printfooter|mw-editsection|sistersitebox|noprint|mw-cite-backlink|authority-control)([\s_-]|$)", re.I)
 
 
 @dataclass

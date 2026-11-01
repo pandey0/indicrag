@@ -53,3 +53,6 @@ See `data/schema/qa_item.schema.json`. CSV working template: `data/labelling/lab
 
 ## Ethics
 No real people's data. No medical/legal individual advice content beyond what the public document states. Label sensitive topics carefully (benefits/eligibility errors can harm users).
+
+## Pilot sheet generator (`scripts/make_labelling_sheet.py`)
+Samples candidate evidence paragraphs (150-700 chars, noise-gated, max 2 per document, fixed seed) from the Wikipedia fallback corpus into `data/labelling/pilot_sheet.csv` (gitignored: contains corpus text). Evidence offsets, hashes and the verbatim quote are prefilled, so the picker is the script and a different person writes the question. Kannada rows are `aligned_parallel` with the English twin named in `notes`; Kannada questions are never authored here. Validate completed items with `python3 -m src.evalrunner.validate_gold <gold.jsonl>` (schema, unique ids, stale-pin detection, `quote == text[start:end]`).
