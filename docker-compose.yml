@@ -1,0 +1,26 @@
+# Local/demo stack: api + web. Secrets come from the environment (e.g. an .env file that is gitignored), never the image.
+services:
+  api:
+    build: .
+    environment:
+      DEMO_ENABLED: "${DEMO_ENABLED:-true}"
+      DEMO_DAILY_BUDGET_USD: "${DEMO_DAILY_BUDGET_USD:-1.0}"
+      CLIENT_SALT: "${CLIENT_SALT:?set CLIENT_SALT to a random string}"
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"   # empty => retrieval-only mode
+      ANTHROPIC_MODEL: "${ANTHROPIC_MODEL:-}"
+      RETRIEVER: bm25
+    volumes:
+      - ./data:/app/data:ro
+    ports:
+      - "127.0.0.1:8000:8000"
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: ["no-new-privileges:true"]
+  web:
+    build: ./web
+    environment:
+      API_URL: http://api:8000
+    depends_on: [api]
+    ports:
+      - "127.0.0.1:3000:3000"
+    security_opt: ["no-new-privileges:true"]

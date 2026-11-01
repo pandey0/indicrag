@@ -1,0 +1,8 @@
+.venv
+data
+eval
+private
+.git
+web/node_modules
+web/.next
+**/__pycache__

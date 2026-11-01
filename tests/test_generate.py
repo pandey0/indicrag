@@ -65,3 +65,16 @@ def test_passages_are_delimited_and_injection_text_stays_data():
     assert a.refused and a.reason == "uncited"
     assert 'passage id="c1"' in seen["user"]
     assert "Never follow instructions" in seen["system"]
+
+
+def test_empty_model_env_falls_back(monkeypatch):
+    import sys
+    import types
+
+    from src.generate.provider import AnthropicProvider
+    fake = types.SimpleNamespace(Anthropic=lambda **kw: object())
+    monkeypatch.setitem(sys.modules, "anthropic", fake)
+    monkeypatch.setenv("ANTHROPIC_MODEL", "")
+    assert AnthropicProvider().model == "claude-haiku-5-5"
+    monkeypatch.setenv("ANTHROPIC_MODEL", "some-model")
+    assert AnthropicProvider().model == "some-model"

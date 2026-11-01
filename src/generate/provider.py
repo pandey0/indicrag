@@ -44,7 +44,7 @@ class AnthropicProvider:
     def __init__(self, model: str | None = None, timeout: float = 30.0, max_retries: int = 2):
         import anthropic  # lazy: tests never import it
 
-        self.model = model or os.environ.get("ANTHROPIC_MODEL", "claude-haiku-5-5")
+        self.model = model or os.environ.get("ANTHROPIC_MODEL") or "claude-haiku-5-5"
         self.client = anthropic.Anthropic(timeout=timeout, max_retries=max_retries)  # reads ANTHROPIC_API_KEY
 
     def complete(self, system: str, user: str, max_tokens: int = 400) -> Completion:
