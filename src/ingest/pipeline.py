@@ -27,7 +27,7 @@ from .store import (MANIFEST_COLS, raw_path, read_manifest, sha256_bytes, sha256
                     write_manifest)
 
 log = logging.getLogger("ingest")
-PARSER_BASE = "indicrag-parse/0.1"
+PARSER_BASE = "indicrag-parse/0.2"
 
 
 def parser_version(cfg: Config) -> str:

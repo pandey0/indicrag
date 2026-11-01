@@ -45,6 +45,10 @@ def _is_boiler(tag: Tag) -> bool:
     ident = f"{cls} {attrs.get('id', '')} {attrs.get('role', '')}"
     if tag.get("role") in ("navigation", "banner", "contentinfo", "complementary", "search"):
         return True
+    toks = set(cls.split())
+    # full-viewport overlays (Tailwind modals/backdrops) hold dialog text, not page content
+    if {"h-screen", "w-screen"} <= toks or ("fixed" in toks and "inset-0" in toks):
+        return True
     return bool(BOILER_ATTR.search(ident))
 
 
