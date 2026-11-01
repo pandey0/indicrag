@@ -34,7 +34,7 @@ def review(items: list[dict], reviewer: str, ask=input, out=print, manifest="dat
             stats["skipped"] += 1
             continue
         out(f"\n--- {n}/{len(todo)}  {it['id']}  [{it['lang']}, {it['qtype']}, {it['difficulty']}]")
-        out("QUOTE:    " + it["evidence"][0]["quote"][:900])
+        out("QUOTE:    " + (it["evidence"][0]["quote"][:900] if it["evidence"] else "(none: must be UNANSWERABLE from the corpus) " + it.get("notes", "")))
         out("QUESTION: " + it["question"])
         out("ANSWER:   " + it["answer"])
         while True:
@@ -121,7 +121,7 @@ def main() -> None:
     items = [json.loads(line) for f in a.files for line in open(f, encoding="utf-8") if line.strip()]
     if a.list:
         for i in pending(items)[: a.list]:
-            print(f"{i['id']} [{i['lang']},{i['qtype']}]\n  QUOTE: {i['evidence'][0]['quote'][:420]}\n  Q: {i['question']}\n  A: {i['answer']}\n")
+            print(f"{i['id']} [{i['lang']},{i['qtype']}]\n  QUOTE: {i['evidence'][0]['quote'][:420] if i['evidence'] else '(none: should be UNANSWERABLE) ' + i.get('notes', '')}\n  Q: {i['question']}\n  A: {i['answer']}\n")
         print(f"({len(pending(items))} pending)")
         return
     if not a.reviewer:
