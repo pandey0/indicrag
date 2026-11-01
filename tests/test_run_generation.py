@@ -44,3 +44,10 @@ def test_long_doc_oracle_skips_items_without_a_gold_document(monkeypatch):
     p = EchoProvider(lambda s, u: seen.append(s) or "Rs 6000 per year.")
     rows = run_generation(ITEMS, retr(), CH, p, "long_doc")
     assert [r.id for r in rows] == ["a1"] and TEXT in seen[0] and rows[0].number_recall == 1.0
+
+
+def test_numbers_ignore_leading_zeros_and_indic_digits():
+    from src.evalrunner.align import numbers
+
+    assert numbers("०१ सितम्बर १९५६") == numbers("1 सितम्बर 1956") == {"1", "1956"}
+    assert numbers("0.5 and 10,000") == {"0.5", "10000"}

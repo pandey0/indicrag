@@ -15,10 +15,16 @@ import numpy as np
 _DIGITS = re.compile(r"\d+(?:[.,]\d+)*")
 
 
+def _norm(m: str) -> str:
+    """Drop thousands separators and leading zeros of integers ('01' == '1'); decimals like '0.5' are kept."""
+    m = m.replace(",", "")
+    return m.lstrip("0") or "0" if m.isdigit() else m
+
+
 def numbers(text: str) -> set[str]:
     """Numbers in text with Indic digits mapped to ASCII (unicodedata.digit), thousands separators dropped."""
     t = "".join(str(unicodedata.digit(c)) if c.isdigit() else c for c in text)
-    return {m.replace(",", "") for m in _DIGITS.findall(t)}
+    return {_norm(m) for m in _DIGITS.findall(t)}
 
 
 def numeric_consistent(src: str, tgt: str) -> bool:
