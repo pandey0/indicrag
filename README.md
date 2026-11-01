@@ -2,7 +2,7 @@
 
 **A Hindi / Kannada / English benchmark and reference system for retrieval-augmented question answering (RAG) over Indian citizen-service documents, with a tool-using agent layer.**
 
-> **Status: design complete, implementation starting.** No code or results yet. Everything below describes what is being built and how it will be measured; results will be added to `eval/RESULTS.md` only when they exist.
+> **Status: pipeline implemented, dataset labelling in progress, no results yet.** Implemented and tested (60 tests, CI): ingestion with OCR, chunking, BM25 / dense / hybrid retrieval, retrieval metrics with paired bootstrap, a gold-data validator, a cited-answer generator with refusal, PII scrubbing, and a FastAPI reference app. Not yet done: the human-validated gold set (the current bottleneck), the web UI, LLM answer evaluation and the agent. Results will be added to `eval/RESULTS.md` only when they exist.
 
 ## Problem
 Government portals, banks and support desks in India need assistants that answer in Hindi, Kannada and English. Teams building them struggle to *measure* whether answers are correct, grounded in sources, and in the right language. Most RAG demos ship with no measurements, and regional-language evaluation data is limited (to be confirmed by a literature review, see `docs/10-references.md`).
@@ -52,7 +52,7 @@ docs/        design: scope, architecture, corpus & licensing, labelling guide, e
              roadmap, agent phase, risks & ethics, references, security & ops
 data/        schema/, labelling template, corpus_manifest.csv (raw/processed gitignored; gold published)
 eval/        config.example.yaml, results/ (summary tables only)
-src/         ingest, parse, chunk, embed, retrieve, generate, agent, api, evalrunner  (planned)
+src/         ingest, parse, chunk, embed, retrieve, generate, security, api, evalrunner  (implemented); agent (planned)
 web/         Next.js app (planned)
 ```
 
