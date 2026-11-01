@@ -49,7 +49,16 @@ class AnthropicProvider:
 
     def complete(self, system: str, user: str, max_tokens: int = 400) -> Completion:
         # no `temperature`: current models reject it with a 400 (deprecated), so runs are not strictly deterministic
-        r = self.client.messages.create(model=self.model, max_tokens=max_tokens, system=system,
-                                        messages=[{"role": "user", "content": user}])
-        text = "".join(b.text for b in r.content if getattr(b, "type", "") == "text")
-        return Completion(text, r.usage.input_tokens, r.usage.output_tokens, self.model)
+        total_in = total_out = 0
+        for _ in range(2):
+            r = self.client.messages.create(model=self.model, max_tokens=max_tokens, system=system,
+                                            messages=[{"role": "user", "content": user}])
+            total_in += r.usage.input_tokens
+            total_out += r.usage.output_tokens
+            text = "".join(b.text for b in r.content if getattr(b, "type", "") == "text")
+            # reasoning models can spend the budget before (or while) emitting text: a reply cut off at max_tokens is unusable for the
+            # structured outputs we parse, so retry once with a larger budget instead of returning "" or a truncated fragment
+            if getattr(r, "stop_reason", "") != "max_tokens":
+                break
+            max_tokens *= 4
+        return Completion(text, total_in, total_out, self.model)

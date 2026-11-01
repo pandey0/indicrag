@@ -60,3 +60,19 @@ def test_harness_with_oracle_and_with_always_wrong_agent():
     assert good["aggregate"]["success"] == 1.0 and good["aggregate"]["used_evaluate_rules"] == 1.0
     wrong = run_tasks(tasks, ctx, EchoProvider(lambda s, u: json.dumps({"final": {"answer": "x", "citations": [], "decision": "eligible"}})))
     assert wrong["aggregate"]["success"] < 1.0 and wrong["aggregate"]["used_evaluate_rules"] == 0.0
+
+
+def test_plain_rag_baseline_parsing_and_scoring():
+    from src.evalrunner.agent_eval import parse_plain_decision, run_plain_rag_tasks
+    assert parse_plain_decision("Reasoning...\nDECISION: not_eligible") == "not_eligible"
+    assert parse_plain_decision("no decision here") is None
+    tasks = load_tasks()[:4]
+    chunks = {"c1": {"chunk_id": "c1", "doc_id": tasks[0]["evidence"][0]["doc_id"], "lang": "en", "text": "age limit pension eligible widow"}}
+    m = BM25()
+    m.add("c1", chunks["c1"]["text"], "en")
+    exp = {t["task"]: t["expected_decision"] for t in tasks}
+    oracle = EchoProvider(lambda s, u: f"ok\nDECISION: {exp[u.split('Question: ', 1)[1]]}")
+    out = run_plain_rag_tasks(tasks, m, chunks, oracle)
+    assert out["aggregate"]["success"] == 1.0 and out["items"][0]["retrieved_gold_doc"] is True
+    never = EchoProvider(lambda s, u: "no verdict line at all")
+    assert run_plain_rag_tasks(tasks, m, chunks, never)["aggregate"]["success"] == 0.0

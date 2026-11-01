@@ -78,3 +78,24 @@ def test_empty_model_env_falls_back(monkeypatch):
     assert AnthropicProvider().model == "claude-haiku-5-5"
     monkeypatch.setenv("ANTHROPIC_MODEL", "some-model")
     assert AnthropicProvider().model == "some-model"
+
+
+def test_reply_cut_off_at_max_tokens_is_retried_with_bigger_budget(monkeypatch):
+    import sys
+    import types
+
+    from src.generate.provider import AnthropicProvider
+    calls = []
+
+    class Msgs:
+        def create(self, model, max_tokens, system, messages):
+            calls.append(max_tokens)
+            u = types.SimpleNamespace(input_tokens=10, output_tokens=max_tokens)
+            if max_tokens < 1000:
+                return types.SimpleNamespace(content=[types.SimpleNamespace(type="thinking"), types.SimpleNamespace(type="text", text="The age requ")], stop_reason="max_tokens", usage=u)
+            return types.SimpleNamespace(content=[types.SimpleNamespace(type="text", text="done")], stop_reason="end_turn", usage=u)
+
+    fake = types.SimpleNamespace(Anthropic=lambda **kw: types.SimpleNamespace(messages=Msgs()))
+    monkeypatch.setitem(sys.modules, "anthropic", fake)
+    c = AnthropicProvider("m").complete("s", "u", 400)
+    assert c.text == "done" and calls == [400, 1600] and c.input_tokens == 20 and c.output_tokens == 2000
