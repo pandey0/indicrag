@@ -7,26 +7,28 @@ Reproduce: `make results GOLD=data/gold/dev.jsonl` (regenerates the tables and p
 ## Pilot gold set (`data/gold/dev.jsonl`, not yet released)
 41 items: 24 English, 17 Hindi, 0 Kannada. Questions were LLM-drafted from sampled passages, then validated by one human reviewer (agreed 40, revised 1, rejected 1 of 42 reviewed; Kannada excluded). Single reviewer, so there is no agreement statistic. Evidence is one span per item. The index holds the whole local corpus (2,141 chunks, 321 English / 42 Hindi / 22 Kannada documents), so every query faces distractors from all documents. Same-language retrieval (query language filters the candidate chunks).
 
-## Retrieval (fixed 512-token-budget chunks, 64 overlap)
+## Retrieval (fixed 512-token-budget chunks, 64 overlap; index = 2,422 chunks from 340 English + 55 Hindi (+22 Kannada, unused) documents)
+Corpus note: an earlier run on a smaller index (2,232 chunks, 321/42 documents) gave nearly identical numbers; adding 190 distractor chunks moved recall@1 by at most 0.05 for any system and changed no conclusion. Tables below are the current ones from `make results`.
+
 | retriever | n | recall@1 | recall@5 | MRR | nDCG@10 |
 |---|---|---|---|---|---|
-| BM25 (word) | 41 | 0.756 | 0.976 | 0.851 | 0.887 |
-| BM25 (char 3-5-gram) | 41 | 0.756 | 0.951 | 0.850 | 0.873 |
+| BM25 (word) | 41 | 0.756 | 0.951 | 0.852 | 0.888 |
+| BM25 (char 3-5-gram) | 41 | 0.780 | 0.951 | 0.862 | 0.882 |
 | dense (multilingual-e5-small) | 41 | 0.658 | 1.000 | 0.807 | 0.854 |
-| hybrid (BM25 + e5-small, RRF k=60) | 41 | 0.780 | 1.000 | 0.878 | 0.903 |
-| dense (bge-m3) | 41 | 0.683 | 0.976 | 0.804 | 0.840 |
+| hybrid (BM25 + e5-small, RRF k=60) | 41 | 0.780 | 1.000 | 0.882 | 0.907 |
+| dense (bge-m3) | 41 | 0.658 | 0.976 | 0.790 | 0.830 |
 | hybrid (BM25 + bge-m3, RRF k=60) | 41 | 0.732 | 0.976 | 0.846 | 0.870 |
 
-By language, recall@1 (en n=24 / hi n=17): BM25 0.667 / 0.882; char-BM25 0.625 / 0.941; dense e5 0.583 / 0.765; hybrid e5 0.750 / 0.824; dense bge-m3 0.625 / 0.765; hybrid bge-m3 0.625 / 0.882.
+By language, recall@1 (en n=24 / hi n=17): BM25 0.667 / 0.882; char-BM25 0.667 / 0.941; dense e5 0.583 / 0.765; hybrid e5 0.750 / 0.824; dense bge-m3 0.625 / 0.706; hybrid bge-m3 0.625 / 0.882.
 
 ## Paired comparisons (95% paired-bootstrap CI on the per-item difference, recall@1 and MRR)
-`make results` prints all 15 pairs per metric (6 systems), 30 comparisons for the two metrics. **Exactly one interval excludes 0: e5-small hybrid vs e5-small dense** (recall@1 +0.122, CI [+0.024, +0.220]; MRR +0.071, CI [+0.022, +0.130]). Everything else includes 0, including:
+`make results` prints all 15 pairs per metric (6 systems), 30 comparisons for the two metrics. **Exactly one interval excludes 0: e5-small hybrid vs e5-small dense** (recall@1 +0.122, CI [+0.024, +0.220]; MRR +0.075, CI [+0.024, +0.134]). Everything else includes 0, including:
 | comparison | recall@1 diff | 95% CI |
 |---|---|---|
-| bge-m3 dense vs e5-small dense | +0.024 | [-0.171, +0.220] |
-| bge-m3 hybrid vs bge-m3 dense | +0.049 | [-0.073, +0.195] |
+| bge-m3 dense vs e5-small dense | 0.000 | [-0.195, +0.195] |
+| bge-m3 hybrid vs bge-m3 dense | +0.073 | [-0.073, +0.220] |
 | BM25 vs e5-small hybrid | -0.024 | [-0.171, +0.122] |
-| char-BM25 vs BM25 | 0.000 | [-0.073, +0.073] |
+| char-BM25 vs BM25 | +0.024 | [0.000, +0.073] |
 
 **Interpretation, conservatively.** With 30 comparisons computed and no multiplicity correction or pre-registered primary comparison, one interval excluding 0 is about what chance alone is expected to give (5% of 30 is about 1.5; the two metrics and overlapping systems are correlated, so this is only a rough guide), and the hybrid-over-dense gap did not appear with bge-m3 (hybrid - dense there is +0.049, CI includes 0). Treat "hybrid beats dense" as an unconfirmed hint, not a finding. These data do NOT distinguish bge-m3 from e5-small, BM25 from dense, or word from character BM25. They do show every method retrieves the gold passage in the top 5 for roughly 95-100% of items, so differences are confined to the top rank.
 
