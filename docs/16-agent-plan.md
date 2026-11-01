@@ -34,3 +34,17 @@ Protocol: tune on tasks agt-001..006 only, then run the other 30 once as the rep
 **Result on the 30 held-out tasks:** success 29/30 = 0.967 (Wilson 95% CI 0.83-0.99); the single failure was the 20,000-token budget, not a wrong decision. evaluate_rules used in 28/30; mean 13.5k tokens/task (405k total).
 
 **Do not over-read this:** n=30; tasks are LLM-drafted and unreviewed; every task is English, single document, scoped to one or two numeric criteria that the task text names ("only consider the age requirement"), which is much easier than open-ended eligibility; the 6 tuning tasks are excluded but I wrote both the tasks and the tool fixes; no plain-RAG baseline and no second model were run, so nothing here shows an agent beats RAG; no Hindi/Kannada tasks. The decision guard (final decision must equal the evaluate_rules decision) also removes one failure mode by construction.
+
+## Plain RAG vs agent, same 30 held-out tasks, fixed provider (claude-haiku-5-5, 2026-11-01)
+Plain RAG = BM25 top-5 + one model call that must end with `DECISION: eligible|not_eligible|unknown` (no tools, no rules engine). Agent = the loop in this doc. Both ran after the provider fix that retries replies cut off at `max_tokens` (reasoning models were returning empty or truncated text).
+
+| system | success (n=30) | mean tokens/task | notes |
+|---|---|---|---|
+| plain RAG | 0.967 (29/30) | 3.5k | one wrong decision (`agt-014`: said unknown, expected not_eligible) |
+| agent | 0.867 (26/30) | 13.5k | all 4 failures were `token_budget` (20k cap): zero wrong decisions; `evaluate_rules` used in 27/30 |
+
+Paired difference (agent - plain): -0.100, 95% bootstrap CI [-0.233, +0.033]. Wins: agent only on `agt-014`; plain only on `agt-017`, `agt-025`, `agt-026`, `agt-029`.
+
+**Reading.** On these tasks the agent shows no accuracy advantage and costs about 4x the tokens; its failures were budget exhaustion, not wrong answers (the interval includes 0, so "plain is better" is also not established). The earlier agent run on the same tasks scored 0.967 (29/30); the drop to 0.867 comes from the provider fix, which makes some steps cost more (a retry counts its extra tokens) so more runs hit the fixed 20k budget, plus run-to-run variance (no `temperature`). I am not raising the budget now and re-reporting, because that would be tuning on the report set; a budget sweep belongs on a fresh task set.
+
+**Why the tasks favour plain RAG:** every task is single-document, scoped to one or two numeric criteria that the question names, so a capable model can do the comparison in its head. The agent's design value (deterministic rules, guards, traces, auditability) is not what these tasks measure; tasks with several interacting criteria, missing-attribute follow-ups, or arithmetic-heavy income rules would test it. Not run: Hindi/Kannada tasks, other models, human-reviewed tasks.
