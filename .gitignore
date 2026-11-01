@@ -19,3 +19,4 @@ data/labelling/pilot_sheet.csv
 data/embeddings/
 data/gold/drafts/
 eval/results/
+data/labelling/kn_alignment_candidates.csv
