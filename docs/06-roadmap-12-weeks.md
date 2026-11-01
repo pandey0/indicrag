@@ -41,3 +41,6 @@ Mon-Thu 30-60 min; weekends 3-4 h block. `JOURNAL.md`: one paragraph/week (shipp
 - Labelling slower than 6 items/hour at quality: use LLM-drafted + validated items, cut cross-lingual.
 - API cost over budget: open models + smaller judge sample (never skip judge calibration).
 - Time shortage: stop after phase 2; still a complete, evaluated project.
+
+## Decision log
+- 2026-11-01: **Kannada dropped from v1** (author decision; no native checker). Pivot applied: Hindi + English v1; Kannada = documented follow-up. The Kannada cross-lingual items and the native-speaker check hours in the budget above are no longer needed.

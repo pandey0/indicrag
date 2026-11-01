@@ -10,7 +10,7 @@ Commands: `make test` (pytest). `make chunk` = `python3 -m src.chunk build [--st
 
 ## What IndicRAG is
 
-Hindi / Kannada / English benchmark + reference RAG system over Indian citizen-service documents, with a phase-3 tool-using agent. Deliverables: labelled dataset, eval harness, FastAPI + Next.js app with citations, agent evaluated on trajectory quality. Out of scope v1: fine-tuning, voice, user accounts/PII, legal/financial advice.
+Hindi / English benchmark + reference RAG system (Kannada deferred, see Language policy) over Indian citizen-service documents, with a phase-3 tool-using agent. Deliverables: labelled dataset, eval harness, FastAPI + Next.js app with citations, agent evaluated on trajectory quality. Out of scope v1: fine-tuning, voice, user accounts/PII, legal/financial advice.
 
 ## Planned architecture (docs/02-architecture.md)
 
@@ -32,8 +32,8 @@ Key design decisions that span files:
 - Week 1 is a parse-feasibility spike (legacy-font/scanned Hindi/Kannada PDFs) before sources are finalised.
 - Kafka/Spark scale demo and custom dashboard were cut. Security, PII, abuse/cost, observability and CI requirements live in `docs/11-security-and-ops.md`; project is a reference implementation, not a production service.
 
-## Language policy (important)
-Author reads/writes en (and hi, to be confirmed) but **not Kannada**. Kannada items are aligned-parallel only (official kn/en pairs, `source_kind: aligned_parallel`, `aligned_with`, `alignment_score`, `native_verified`), reported as a separate unverified slice, never described as natively authored. Never claim fluency or native-quality Kannada labels anywhere. See `docs/01`, `docs/04`.
+## Language policy (important; Kannada is OUT of v1 as of 2026-11-01, author decision)
+Author reads/writes en (and hi, to be confirmed) but **not Kannada**; the author decided not to add Kannada to v1, so build no Kannada gold or claims unless that decision is reversed and a native validator exists. Preserved groundwork (kept, not v1): Kannada items are aligned-parallel only (official kn/en pairs, `source_kind: aligned_parallel`, `aligned_with`, `alignment_score`, `native_verified`), reported as a separate unverified slice, never described as natively authored. Never claim fluency or native-quality Kannada labels anywhere. See `docs/01`, `docs/04`.
 
 ## Data and schema
 

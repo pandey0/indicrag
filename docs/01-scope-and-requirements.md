@@ -10,7 +10,7 @@ G5. Publish findings (results table, failure analysis, blog).
 ## Language coverage policy
 The author reads/writes English and Hindi (to be confirmed per labelling session); no Kannada reader/writer is currently on the project. Therefore:
 - **en, hi:** natively labelled by the author (hi: reviewed by a second Hindi reader on a sample).
-- **kn:** **aligned-parallel only**: Kannada items are derived from English items where an official Kannada/English parallel document exists, via cross-lingual span alignment, with automated consistency checks and a native-speaker check on a sample. Kannada results are always reported as a separate slice labelled "aligned, partially verified"; they are never described as natively authored. No native-register Kannada (colloquial, code-mixed, romanized) items unless a native annotator joins.
+- **kn (DEFERRED, decision 2026-11-01: out of v1; see below):** **aligned-parallel only**: Kannada items are derived from English items where an official Kannada/English parallel document exists, via cross-lingual span alignment, with automated consistency checks and a native-speaker check on a sample. Kannada results are always reported as a separate slice labelled "aligned, partially verified"; they are never described as natively authored. No native-register Kannada (colloquial, code-mixed, romanized) items unless a native annotator joins.
 
 ## Non-goals (v1)
 Model training or fine-tuning; voice/ASR/TTS; user accounts or PII; legal/financial advice; scraping sources whose terms forbid it; claims of production usage.
@@ -45,3 +45,6 @@ Reference implementation with measured quality and basic abuse/privacy controls.
 - `make eval CONFIG=eval/configs/baseline.yaml` reproduces the published baseline table exactly with the response cache, and within measured variance without it.
 - Dataset card documents sources, licences, labelling process, agreement score, known limits.
 - Demo is reachable; README has architecture + results; blog post published.
+
+## Decision log: Kannada out of v1 (2026-11-01)
+The author does not want Kannada in v1 and no native Kannada checker is available. This triggers the pre-decided pivot in `docs/06` ("ship Hindi+English v1"). Consequences: v1 covers English and Hindi only; no Kannada gold, no Kannada results, no Kannada claims anywhere. Kannada corpus files and the alignment/native-check tooling stay as documented groundwork. Reinstating Kannada requires a native-speaker validator, then following the aligned-parallel protocol in `docs/04`.

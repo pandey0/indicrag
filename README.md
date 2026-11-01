@@ -1,16 +1,16 @@
 # IndicRAG
 
-**A Hindi / Kannada / English benchmark and reference system for retrieval-augmented question answering (RAG) over Indian citizen-service documents, with a tool-using agent layer.**
+**A Hindi / English benchmark and reference system for retrieval-augmented question answering (RAG) over Indian citizen-service documents, with a tool-using agent layer.**
 
 > **Status: pipeline implemented, dataset labelling in progress, no results yet.** Implemented and tested (CI): ingestion with OCR, chunking, BM25 / dense / hybrid retrieval, retrieval metrics with paired bootstrap, a gold-data validator, a cited-answer generator with refusal, PII scrubbing, and a FastAPI reference app with a minimal web UI, and an eligibility-focused agent core (deterministic rule engine, validated tools, budgeted loop with traces; untested against a real model). Not yet done: the human-validated gold set (the current bottleneck), LLM answer evaluation and the agent. First small-n results are in `eval/RESULTS.md`.
 
 ## Problem
-Government portals, banks and support desks in India need assistants that answer in Hindi, Kannada and English. Teams building them struggle to *measure* whether answers are correct, grounded in sources, and in the right language. Most RAG demos ship with no measurements, and regional-language evaluation data is limited (to be confirmed by a literature review, see `docs/10-references.md`).
+Government portals, banks and support desks in India need assistants that answer in Hindi and English. Teams building them struggle to *measure* whether answers are correct, grounded in sources, and in the right language. Most RAG demos ship with no measurements, and regional-language evaluation data is limited (to be confirmed by a literature review, see `docs/10-references.md`).
 
 IndicRAG asks: *given real public-service documents, how well do different RAG designs work in three languages, and where do they fail?*
 
 ## What it delivers
-1. **Dataset:** question / answer / evidence-span items in hi and en (target 150 per language, minimum 100) plus a Kannada slice derived from official kn/en parallel documents (aligned and partially native-verified, reported separately), including unanswerable, colloquial, romanized and code-mixed questions. Released with a dataset card.
+1. **Dataset:** question / answer / evidence-span items in hi and en (target 150 per language, minimum 100), including unanswerable, colloquial, romanized and code-mixed questions. Released with a dataset card.
 2. **Evaluation harness:** reproducible runs from a YAML config; retrieval, faithfulness, citation, abstention, robustness and cost metrics, with paired statistics.
 3. **Reference app:** FastAPI + Next.js. Every answer shows cited passages, the source's valid-as-of date and a "not official advice" notice.
 4. **Agent layer:** tool-calling agent for eligibility / document-list tasks, evaluated on task success and tool-call accuracy against plain RAG.
@@ -67,7 +67,7 @@ make test
 The corpus is fetched by the ingest scripts under each source's terms and is never committed or baked into images.
 
 ## Results
-Early, small-n measurements are in [`eval/RESULTS.md`](eval/RESULTS.md): 41 human-validated pilot items (English and Hindi only, no Kannada yet), six retrieval configurations. At this sample size the configurations are mostly statistically indistinguishable (all place the gold passage in the top 5 for about 95-100% of items); one hybrid-over-dense gap appeared with one embedding model and did not replicate with the other, so it is reported as an unconfirmed hint. The gold set is not released and these numbers are not a benchmark yet.
+Early, small-n measurements are in [`eval/RESULTS.md`](eval/RESULTS.md): 41 human-validated pilot items (English and Hindi only), six retrieval configurations. At this sample size the configurations are mostly statistically indistinguishable (all place the gold passage in the top 5 for about 95-100% of items); one hybrid-over-dense gap appeared with one embedding model and did not replicate with the other, so it is reported as an unconfirmed hint. The gold set is not released and these numbers are not a benchmark yet.
 
 ## Scope, limitations and responsible use
 - Uses only public documents whose licence/terms permit it; the licence decision for each source is recorded in the manifest. Text is redistributed only where allowed; otherwise labels, spans and fetch scripts are released.
@@ -79,4 +79,7 @@ Early, small-n measurements are in [`eval/RESULTS.md`](eval/RESULTS.md): 41 huma
 Arpit Pandey: building this end to end (data engineering, evaluation, backend, frontend, agents). Each language's labels need a native-speaker annotator; who labelled and reviewed what will be credited in the dataset card (`docs/04-labelling-guide.md`).
 
 ## Contributing
-Corrections to labels, new sources with clear licences, and Hindi/Kannada reviewers are welcome once the dataset is public; open an issue.
+Corrections to labels, new sources with clear licences, and Hindi reviewers (and native Kannada reviewers, should Kannada be added) are welcome once the dataset is public; open an issue.
+
+## Scope decision: Kannada is out of v1
+Kannada was an original goal. It is deferred because the project has no native Kannada reader to validate questions or answers, and unvalidated Kannada labels would not support honest claims. The Kannada documents already fetched, and the tooling for English-Kannada alignment with a native-speaker check (`scripts/align_kn_candidates.py`, `src/evalrunner/align.py`), remain in the repository as groundwork. No result in this repository covers Kannada. Adding it needs a native Kannada validator; see `docs/01-scope-and-requirements.md`.

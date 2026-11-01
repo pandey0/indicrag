@@ -3,7 +3,7 @@
 **Status: no dataset release exists.** This card records what is true now so claims cannot outrun the data. The labelled set (`data/gold/`) does not exist yet; only unreviewed LLM drafts do.
 
 ## Intended use
-Evaluating retrieval and answer quality of RAG systems on Indian citizen-service questions in English, Hindi and Kannada. Not for training; not a source of legal, financial or eligibility advice.
+Evaluating retrieval and answer quality of RAG systems on Indian citizen-service questions in English and Hindi. **Kannada is out of v1** (see `docs/01`): no Kannada items exist. Not for training; not a source of legal, financial or eligibility advice.
 
 ## Corpus (local, not redistributed; `redistribute=false` for every row until a human approves a licence verdict)
 | language | source | docs | characters |
@@ -36,3 +36,6 @@ Gold labels and tooling: repository licence. Corpus text: not redistributed. Wik
 
 ## Contact and deletion
 To be added before any public release.
+
+## Scope note
+Earlier sections mention Kannada documents and an aligned-parallel protocol; those describe preserved groundwork only. The v1 dataset has no Kannada items and makes no claim about Kannada.
