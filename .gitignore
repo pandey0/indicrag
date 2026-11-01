@@ -16,3 +16,4 @@ private/
 data/.ingest.lock
 data/chunks/
 data/labelling/pilot_sheet.csv
+data/embeddings/

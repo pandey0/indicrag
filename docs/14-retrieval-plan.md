@@ -25,3 +25,11 @@ BM25 runs on `fixed_512_64` chunks. Observed issues to address before any number
 - Analyzer option added (`word` | `char` 3-5-gram). A proxy check (`scripts/proxy_retrieval.py`: query = article title, gold = that article) is **saturated** (hit@5 = 1.0 for both analyzers, hit@1 0.92-1.0), so it cannot choose between them. Decision deferred to real gold items; do not tune on the proxy.
 - Postgres schema `db/migrations/0001_init.sql` (documents, chunks with generated `simple` tsvector + GIN, per-model `chunk_embeddings` table) loads cleanly via `scripts/db_load.py` into a local pgvector container (`make db-up db-load`): 385 docs, 2068 chunks (en 1413 / hi 477 / kn 178). Full-text and `<=>` vector queries verified.
 - Still open: embedding model choice (disk), dense + hybrid retriever, gold labelling.
+
+## Dense retrieval plan (step 3), disk now ~13 GB free
+- **Baseline model:** `intfloat/multilingual-e5-small` (118M params, 384-d, MIT): small enough for CPU on ~1.8k chunks. E5 needs prefixes: `query: ` / `passage: ` (a known source of silent quality loss if omitted; enforced in the wrapper and tested).
+- **Ablation model (one factor changed):** `BAAI/bge-m3` (568M, 1024-d, MIT, strong on Indic) once the baseline path works. Model names verified on the model cards at download time.
+- **Interface:** `Embedder.encode(texts, kind: 'query'|'passage') -> ndarray` (L2-normalised), so cosine = dot product and the stored vectors work with pgvector `<=>`.
+- **Storage:** `chunk_embeddings(chunk_id, model, dim, embedding)`; index per model. Embedding is idempotent: skip (chunk_id, model) pairs already stored. Batches seeded/deterministic (CPU inference).
+- **Retrievers:** `DenseRetriever` (in-memory numpy brute force for evaluation reproducibility; pgvector for the app) and hybrid RRF with BM25 (`rrf`, k=60).
+- **Acceptance:** unit tests with a fake embedder (prefix handling, normalisation, idempotence, ranking); smoke test on the real model only after install; no quality numbers until gold items exist.
