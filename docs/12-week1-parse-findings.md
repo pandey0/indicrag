@@ -36,3 +36,20 @@ The author cannot read or write Kannada. Kannada is therefore handled as aligned
 
 ## Licence review (draft, awaiting human approval)
 `scripts/licence_scan.py` extracted copyright/terms clauses; proposed verdicts per host are in `data/licence_review/verdicts.csv` (`human_approved` empty: **nothing is approved yet**; manifest verdicts stay `unclear`). Summary: only myScheme (English) is clearly reusable with conditions (accurate, attributed, non-misleading). Karnataka CEG sites and NFSA allow reproduction **after permission**. NSP forbids reproduction without permission. MyGov's terms conflict. RTI portal, Ahara, Seva Sindhu and Bihar RTPS show no usable policy. Consequence: almost all Hindi/Kannada sources need a permission email (draft in `data/licence_review/permission_requests_draft.md`, not sent), otherwise the release falls back to labels + spans + URLs + hashes without document text (docs/03). This is not legal advice.
+
+## Ingestion run results (pipeline, 2026-11-01)
+300 sources in the local manifest (raw and parsed text stay local and gitignored; `redistribute=false`).
+
+| lang | sources | ok | ocr_ok | fail / fetch_failed | chars |
+|---|---|---|---|---|---|
+| en | 282 | 280 | 2 | 0 | ~1.39M (268 myScheme pages + 14 candidates) |
+| hi | 7 | 4 | 2 | 1 | ~246k |
+| kn | 11 | 6 | 3 | 2 | ~60k |
+
+Spot-check (heuristics pass is not quality):
+- Clean: Kannada HTML (Seva Sindhu FAQ, Karnataka School Education pages) and English myScheme.
+- Hindi: Bihar RTPS list and RTI portal text are clean but are navigation/service lists, not Q&A prose. `rti_act_hi` OCR is readable in the body but noisy in the table of contents (dot leaders).
+- `ahara_charter_kn` OCR contains long runs of garbage (likely photo/graphic pages) and `karnataka_rti_manual_kn` is a CMS admin screenshot manual in English UI text: neither is usable citizen content. Both need page-level OCR confidence filtering or exclusion.
+- `sevasindhu_depts_kn` / `sevasindhu_track_kn`: headless rendering works, but the pages are link indexes (department names, status-check form) plus site-wide policy/FAQ modals already ingested elsewhere; kept as `fail` (low value).
+- `pib_about_hi`: 403, not bypassed.
+- Net usable Kannada prose is about 10k characters; Hindi scheme-style prose remains the main gap.
