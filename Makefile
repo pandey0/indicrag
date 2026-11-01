@@ -1,4 +1,4 @@
-.PHONY: test ingest ingest-myscheme discover-myscheme chunk db-up db-load eval
+.PHONY: test ingest ingest-myscheme discover-myscheme chunk db-up db-load eval api
 test:
 	python3 -m pytest -q
 ingest:            ## fetch+parse the candidate sources (set TESSERACT_BIN/TESSDATA_PREFIX for OCR)
@@ -20,3 +20,7 @@ db-load:
 # retrieval eval: make eval GOLD=data/gold/dev.jsonl RETRIEVER=bm25
 eval:
 	python3 -m src.evalrunner.run_retrieval --gold $(GOLD) --retriever $(RETRIEVER)
+
+# reference API (retrieval-only without ANTHROPIC_API_KEY)
+api:
+	python3 -m uvicorn src.api.main:app --port 8000
