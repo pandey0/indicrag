@@ -17,14 +17,13 @@ import fitz
 import requests
 
 from ..parse.boilerplate import strip_host_boilerplate
-from ..parse.extract import Block, ParsedDoc, assemble, extract_html, extract_pdf, normalize
+from ..parse.extract import Block, assemble, extract_html, extract_pdf, normalize
 from ..parse.ocr import ocr_pdf, tesseract_path, tesseract_version
 from ..parse.quality import classify, compute_metrics, layer_ocr_agreement
 from .config import Config
 from .fetch import Fetcher, decode_html
 from .render import Renderer
-from .store import (MANIFEST_COLS, raw_path, read_manifest, sha256_bytes, sha256_text, write_if_new, write_json,
-                    write_manifest)
+from .store import raw_path, read_manifest, sha256_bytes, sha256_text, write_if_new, write_json, write_manifest
 
 log = logging.getLogger("ingest")
 PARSER_BASE = "indicrag-parse/0.3"
@@ -92,7 +91,7 @@ def run(sources_path: Path, cfg: Config | None = None, only: set[str] | None = N
     try:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except BlockingIOError:
-        raise SystemExit("another ingest run holds data/.ingest.lock; wait for it to finish")
+        raise SystemExit("another ingest run holds data/.ingest.lock; wait for it to finish") from None
     manifest = read_manifest(cfg.manifest_path)
     sources = load_sources(sources_path, only)[: limit or None]
     pv = parser_version(cfg)
@@ -156,7 +155,7 @@ def run(sources_path: Path, cfg: Config | None = None, only: set[str] | None = N
     for sid, c in parsed.items():
         if c["blocks"]:
             by_host[urlsplit(manifest[sid]["url"]).netloc][sid] = c["blocks"]
-    for host, docs in by_host.items():
+    for docs in by_host.values():
         clean = strip_host_boilerplate(docs)
         for sid, blocks in clean.items():
             text, sections = assemble(blocks)

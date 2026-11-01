@@ -4,8 +4,8 @@ from __future__ import annotations
 import hashlib
 import os
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable
 
 
 def client_key(ip: str, salt: str) -> str:
@@ -67,7 +67,7 @@ class Settings:
     salt: str = "dev-salt-change-me"
 
     @classmethod
-    def from_env(cls) -> "Settings":
+    def from_env(cls) -> Settings:
         e = os.environ.get
         return cls(enabled=e("DEMO_ENABLED", "true").lower() != "false", per_minute=int(e("RATE_PER_MIN", 10)),
                    per_day=int(e("RATE_PER_DAY", 100)), daily_budget_usd=float(e("DEMO_DAILY_BUDGET_USD", 1.0)),

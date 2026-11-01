@@ -61,7 +61,7 @@ class BM25:
         self.avgdl = sum(self.len) / len(self.len)
 
     @classmethod
-    def from_jsonl(cls, path: str | Path, **kw) -> "BM25":
+    def from_jsonl(cls, path: str | Path, **kw) -> BM25:
         m = cls(**kw)
         with open(path, encoding="utf-8") as f:
             for line in f:

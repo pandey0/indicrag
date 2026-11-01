@@ -4,9 +4,12 @@
 Writes data/licence_review/scan.json (clauses + source URLs). Verdicts are NOT decided here:
 a human reviews the clauses and records allow/deny/unclear in data/licence_review/verdicts.csv.
 """
-import json, re, time
+import json
+import re
+import time
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
+
 import requests
 from bs4 import BeautifulSoup
 
@@ -57,7 +60,7 @@ for host, seeds in SITES.items():
                         rr = requests.get(h, headers={"User-Agent": UA}, timeout=25); time.sleep(1.5)
                         if rr.ok and "html" in rr.headers.get("content-type", ""): urls.append((h, rr.content.decode("utf-8", "replace")))
                     except requests.RequestException: pass
-        except requests.RequestException as e:
+        except requests.RequestException:
             urls.append((u, ""))
     for u, html in urls[1:] if len(seeds) == 1 else urls:
         if not html: continue

@@ -1,6 +1,5 @@
 import copy
 import hashlib
-import json
 from pathlib import Path
 
 from src.evalrunner.validate_gold import validate_items

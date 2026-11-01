@@ -8,7 +8,6 @@ python3 scripts/make_labelling_sheet.py --per-lang 40 --seed 7 --out data/labell
 """
 import argparse
 import csv
-import json
 import random
 import sys
 from collections import defaultdict

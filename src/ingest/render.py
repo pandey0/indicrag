@@ -15,7 +15,7 @@ class Renderer:
         self._ctx = None
         self._last: dict[str, float] = {}
 
-    def __enter__(self) -> "Renderer":
+    def __enter__(self) -> Renderer:
         from playwright.sync_api import sync_playwright  # optional dependency
 
         self._pw = sync_playwright().start()

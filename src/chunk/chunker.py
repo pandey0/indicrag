@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import hashlib
 import re
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
-from typing import Callable
 
 from .quality import junk_reason
 
@@ -58,7 +58,8 @@ def _units(text: str, lo: int, hi: int) -> list[tuple[int, int]]:
 
 def _split_long(text: str, s: int, e: int, lang: str, budget: int, count: TokenCounter) -> list[tuple[int, int]]:
     """Hard-split an oversize unit on whitespace so each piece fits the budget."""
-    pieces, cur = [], s
+    pieces: list[tuple[int, int]] = []
+    last_end = s
     words = [m.span() for m in re.finditer(r"\S+", text[s:e])]
     start = None
     for ws, we in words:
