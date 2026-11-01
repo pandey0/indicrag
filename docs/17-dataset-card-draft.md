@@ -8,7 +8,7 @@ Evaluating retrieval and answer quality of RAG systems on Indian citizen-service
 ## Corpus (local, not redistributed; `redistribute=false` for every row until a human approves a licence verdict)
 | language | source | docs | characters |
 |---|---|---|---|
-| en | myScheme scheme pages (rendered) | 247 | 1.63M |
+| en | myScheme scheme pages (rendered) | 268 | 1.78M |
 | en | other government PDFs/pages | 14 | 0.19M |
 | en | Wikipedia (CC BY-SA 4.0) | 39 | 0.60M |
 | hi | Wikipedia (CC BY-SA 4.0) | 36 | 0.18M |
@@ -16,7 +16,7 @@ Evaluating retrieval and answer quality of RAG systems on Indian citizen-service
 | kn | Wikipedia (CC BY-SA 4.0) | 13 | 0.07M |
 | kn | other government (Seva Sindhu, Karnataka School Education, OCR'd PDFs) | 9 | 0.06M |
 
-21 further myScheme pages fetched as empty shells and are excluded (`parse_status=fail`). Hindi and Kannada prose is mostly encyclopedic (Wikipedia) because official Hindi/Kannada sources were blocked to bots, TLS-broken, or had no usable licence; Kannada volume is small.
+138 myScheme pages first rendered as empty shells (the app shell loaded before its data); the renderer now waits for content and a post-cleanup floor rejects shells, and all 268 pages have been recovered. Hindi and Kannada prose is mostly encyclopedic (Wikipedia) because official Hindi/Kannada sources were blocked to bots, TLS-broken, or had no usable licence; Kannada volume is small.
 
 ## Collection and processing
 Polite fetch (robots.txt honoured, 2 s per-host delay, no TLS bypass), content-addressed raw storage (sha256), parser-versioned extraction with OCR fallback (Tesseract) and a text-layer-vs-OCR agreement check, per-host boilerplate removal, chunking (512-token-budget fixed chunks, script-aware token approximation). OCR error rates have **not** been measured; Kannada OCR quality cannot be judged by the team.
@@ -29,7 +29,7 @@ Gold evidence is a span (`doc_id`, `parsed_sha256`, offsets, verbatim quote). Qu
 - Most items are single-fact, single-document; multi-hop, comparison and unanswerable coverage is minimal.
 - LLM-drafted questions share vocabulary with their source passage (lexical leakage favours lexical retrievers); human rewrites are required before any comparison is reported.
 - Sampling is keyword-filtered toward eligibility/benefit/process text, so it over-represents scheme-rule passages.
-- English dominates the corpus (about 2.4M characters vs 0.4M Hindi and 0.13M Kannada); cross-language scores are not directly comparable without the distractor pool being matched.
+- English dominates the corpus (about 2.6M characters vs 0.4M Hindi and 0.13M Kannada); cross-language scores are not directly comparable without the distractor pool being matched.
 
 ## Licence statement (draft)
 Gold labels and tooling: repository licence. Corpus text: not redistributed. Wikipedia-derived text, if ever redistributed, must carry attribution and share-alike (CC BY-SA 4.0). Government-source verdicts are drafts awaiting human approval (`data/licence_review/verdicts.csv`); this is not legal advice.

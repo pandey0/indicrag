@@ -64,3 +64,6 @@ Official Hindi sources tried in round two all failed: PIB returns 403 to non-bro
 | kn | 9 docs, 59k | 13 docs, 83k | 142k |
 
 Wikipedia is encyclopedic, not authoritative guidance: answers need a "valid as of" date and the dataset card must say the Hindi/Kannada slice is Wikipedia-derived. Parser 0.2 drops viewport-overlay modals; `make chunk` yields 1413 en / 477 hi / 178 kn fixed chunks.
+
+## Empty-shell pages (found 2026-11-01)
+138 of 268 myScheme pages had been fetched as site-chrome shells (<= 418 chars) because the renderer waited for `main`, which exists before scheme data loads, and the page-level quality gate treated site chrome as text, so they passed as `ok` and polluted the index. Fixes: renderer waits for a non-empty `<h1>`; a post-boilerplate content floor (`Config.min_content_chars`, 450) fails shells; generic titles ("UX4G Accessibility Tool") fall back to h1. A refetch recovered 117 pages, and a second pass 21 more (the first failures were load-related). All 268 are now `ok` with median ~6.2k characters. Lesson: passing a heuristic gate is not content; sample real documents before trusting counts.
