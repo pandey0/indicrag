@@ -14,3 +14,4 @@ eval/results/*/raw/
 web/.next/
 private/
 data/.ingest.lock
+data/chunks/
