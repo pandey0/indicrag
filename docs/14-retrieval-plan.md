@@ -20,3 +20,8 @@ BM25 runs on `fixed_512_64` chunks. Observed issues to address before any number
 - Hindi query "सूचना के अधिकार के तहत आवेदन शुल्क" returned Bihar RTPS chunks, not RTI Act chunks: common function words (के, का, तहत) and noisy RTI OCR text dominate. Candidates: Hindi/Kannada stopword list, character n-gram ablation, OCR text cleaning.
 - (FIXED, parser 0.2: full-viewport overlay modals are dropped; 0 of 268 current myScheme files contain the notice) myScheme chunks contained a site-wide redirect notice ("You're being redirected to an external website..."): the per-host boilerplate remover does not catch it on rendered pages (likely because it appears inside a modal with varied surrounding text). Fix in the parse stage and re-chunk.
 - Two top hits for the Hindi query had identical scores: duplicated text in a source page; dedupe identical chunk text per document.
+
+## Status 2026-11-01 (end of this step)
+- Analyzer option added (`word` | `char` 3-5-gram). A proxy check (`scripts/proxy_retrieval.py`: query = article title, gold = that article) is **saturated** (hit@5 = 1.0 for both analyzers, hit@1 0.92-1.0), so it cannot choose between them. Decision deferred to real gold items; do not tune on the proxy.
+- Postgres schema `db/migrations/0001_init.sql` (documents, chunks with generated `simple` tsvector + GIN, per-model `chunk_embeddings` table) loads cleanly via `scripts/db_load.py` into a local pgvector container (`make db-up db-load`): 385 docs, 2068 chunks (en 1413 / hi 477 / kn 178). Full-text and `<=>` vector queries verified.
+- Still open: embedding model choice (disk), dense + hybrid retriever, gold labelling.

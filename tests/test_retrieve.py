@@ -39,3 +39,12 @@ def test_rrf_fusion():
     assert [h.chunk_id for h in out][:2] == ["a", "b"]  # a: 1/61+1/62 ; b: 1/62+1/61 tie -> id order
     assert {h.chunk_id for h in out} == {"a", "b", "c", "d"}
     assert len(rrf([r1, r2], top=2)) == 2
+
+
+def test_char_analyzer_matches_inflected_forms():
+    from src.retrieve.bm25 import char_ngrams
+    m = BM25(analyzer="char")
+    m.add("a", "farmers receive support", "en")
+    m.add("b", "ration household eligibility", "en")
+    assert m.search("farmer", 1)[0].chunk_id == "a"  # 'farmer' vs 'farmers' only matches via n-grams
+    assert char_ngrams("a") == ["^a$"] and "^ab" in char_ngrams("ab")

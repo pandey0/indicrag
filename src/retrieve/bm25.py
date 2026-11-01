@@ -19,9 +19,26 @@ def tokenize(text: str) -> list[str]:
     return [t.strip("_") for t in _TOKEN.findall(text) if t.strip("_")]
 
 
+def char_ngrams(text: str, lo: int = 3, hi: int = 5) -> list[str]:
+    """Within-word character n-grams (words padded with boundary marks); helps inflected/agglutinative scripts."""
+    out: list[str] = []
+    for w in tokenize(text):
+        w = f"^{w}$"
+        if len(w) <= lo:
+            out.append(w)
+            continue
+        for n in range(lo, hi + 1):
+            out.extend(w[i:i + n] for i in range(len(w) - n + 1))
+    return out
+
+
+ANALYZERS = {"word": tokenize, "char": char_ngrams}
+
+
 class BM25:
-    def __init__(self, k1: float = 1.5, b: float = 0.75):
+    def __init__(self, k1: float = 1.5, b: float = 0.75, analyzer: str = "word"):
         self.k1, self.b = k1, b
+        self.analyze = ANALYZERS[analyzer]
         self.ids: list[str] = []
         self.langs: list[str] = []
         self.tf: list[Counter] = []
@@ -31,7 +48,7 @@ class BM25:
         self.avgdl = 0.0
 
     def add(self, chunk_id: str, text: str, lang: str) -> None:
-        toks = tokenize(text)
+        toks = self.analyze(text)
         i = len(self.ids)
         self.ids.append(chunk_id)
         self.langs.append(lang)
@@ -58,7 +75,7 @@ class BM25:
 
     def search(self, query: str, k: int = 5, lang: str | None = None) -> list[Hit]:
         scores: dict[int, float] = defaultdict(float)
-        for t in set(tokenize(query)):
+        for t in set(self.analyze(query)):
             if t not in self.postings:
                 continue
             idf = self._idf(t)
