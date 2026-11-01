@@ -1,5 +1,7 @@
 # Results (first measurements, 2026-11-01)
 
+Reproduce: `make results GOLD=data/gold/dev.jsonl` (regenerates the tables and paired comparisons below).
+
 **Read the limits first.** These are early, small-n numbers on an unreleased pilot set. They show the harness works and rule out nothing beyond what the intervals say.
 
 ## Pilot gold set (`data/gold/dev.jsonl`, not yet released)

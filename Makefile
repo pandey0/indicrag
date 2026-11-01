@@ -1,4 +1,4 @@
-.PHONY: test ingest ingest-myscheme discover-myscheme chunk db-up db-load eval api
+.PHONY: test ingest ingest-myscheme discover-myscheme chunk db-up db-load eval api results
 test:
 	python3 -m pytest -q
 ingest:            ## fetch+parse the candidate sources (set TESSERACT_BIN/TESSDATA_PREFIX for OCR)
@@ -24,3 +24,7 @@ eval:
 # reference API (retrieval-only without ANTHROPIC_API_KEY)
 api:
 	python3 -m uvicorn src.api.main:app --port 8000
+
+# all retrievers + paired comparisons on a gold file (needs .venv + embeddings for dense/hybrid)
+results:
+	.venv/bin/python scripts/run_all_retrievers.py --gold $(GOLD)
