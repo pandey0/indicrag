@@ -24,7 +24,7 @@ def load_chunks(path: str | Path) -> dict[str, dict]:
     return {c["chunk_id"]: c for c in (json.loads(l) for l in open(path, encoding="utf-8") if l.strip())}
 
 
-def build_retriever(kind: str, chunks: dict[str, dict], model: str, emb_path: str | None = None):
+def build_retriever(kind: str, chunks: dict[str, dict], model: str, chunks_path: str, emb_path: str | None = None):
     def bm(analyzer):
         m = BM25(analyzer=analyzer)
         for c in chunks.values():
@@ -38,7 +38,7 @@ def build_retriever(kind: str, chunks: dict[str, dict], model: str, emb_path: st
     from src.embed.embedder import SentenceTransformerEmbedder
     from src.retrieve.dense import DenseRetriever
 
-    p = emb_path or f"data/embeddings/{model.replace('/', '_')}__{Path(next(iter(chunks.values()))['strategy'] + '_' + str(next(iter(chunks.values()))['budget'])).stem}.npz"
+    p = emb_path or f"data/embeddings/{model.replace('/', '_')}__{Path(chunks_path).stem}.npz"
     z = np.load(p, allow_pickle=False)
     dense = DenseRetriever(SentenceTransformerEmbedder(model), z["ids"].tolist(), z["langs"].tolist(), z["matrix"])
     if kind == "dense":
@@ -86,7 +86,7 @@ def main() -> None:
            "retriever": a.retriever, "model": a.model if a.retriever in ("dense", "hybrid") else None, "k": a.k, "same_lang": not a.cross_lingual}
     sha = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
     run_id = f"{a.retriever}-{hashlib.sha256(json.dumps(cfg, sort_keys=True).encode()).hexdigest()[:8]}"
-    summary, per_item = evaluate(items, build_retriever(a.retriever, chunks, a.model), chunks, a.k, not a.cross_lingual)
+    summary, per_item = evaluate(items, build_retriever(a.retriever, chunks, a.model, a.chunks), chunks, a.k, not a.cross_lingual)
     out = Path("eval/results") / run_id
     out.mkdir(parents=True, exist_ok=True)
     (out / "config.json").write_text(json.dumps({**cfg, "git_sha": sha}, indent=1), encoding="utf-8")
