@@ -18,5 +18,5 @@ Local disk is ~99% full (about 3 GB free), so large model downloads are deferred
 ## First smoke test (not an evaluation; no gold items exist yet)
 BM25 runs on `fixed_512_64` chunks. Observed issues to address before any numbers are reported:
 - Hindi query "सूचना के अधिकार के तहत आवेदन शुल्क" returned Bihar RTPS chunks, not RTI Act chunks: common function words (के, का, तहत) and noisy RTI OCR text dominate. Candidates: Hindi/Kannada stopword list, character n-gram ablation, OCR text cleaning.
-- myScheme chunks still contain a site-wide redirect notice ("You're being redirected to an external website..."): the per-host boilerplate remover does not catch it on rendered pages (likely because it appears inside a modal with varied surrounding text). Fix in the parse stage and re-chunk.
+- (FIXED, parser 0.2: full-viewport overlay modals are dropped; 0 of 268 current myScheme files contain the notice) myScheme chunks contained a site-wide redirect notice ("You're being redirected to an external website..."): the per-host boilerplate remover does not catch it on rendered pages (likely because it appears inside a modal with varied surrounding text). Fix in the parse stage and re-chunk.
 - Two top hits for the Hindi query had identical scores: duplicated text in a source page; dedupe identical chunk text per document.

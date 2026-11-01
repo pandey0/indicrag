@@ -53,3 +53,14 @@ Spot-check (heuristics pass is not quality):
 - `sevasindhu_depts_kn` / `sevasindhu_track_kn`: headless rendering works, but the pages are link indexes (department names, status-check form) plus site-wide policy/FAQ modals already ingested elsewhere; kept as `fail` (low value).
 - `pib_about_hi`: 403, not bypassed.
 - Net usable Kannada prose is about 10k characters; Hindi scheme-style prose remains the main gap.
+
+## Corpus after fallback sources (2026-11-01)
+Official Hindi sources tried in round two all failed: PIB returns 403 to non-browser clients, consumeraffairs.nic.in timed out, NHA robots.txt disallows crawling; pmkisan.gov.in fails TLS verification (not bypassed). Third-party scheme datasets were reviewed and rejected (docs/03). Fallback: Wikipedia (CC BY-SA 4.0) articles on citizen-service topics with hi/kn interlanguage pairs (`scripts/discover_wikipedia.py`, `data/sources_wikipedia.csv`).
+
+| lang | gov/official docs | Wikipedia | total chars |
+|---|---|---|---|
+| en | 282 docs, 1.13M | 39 docs, 0.96M | 2.09M |
+| hi | 6 docs, 246k (mostly OCR / nav lists) | 36 docs, 224k | 469k |
+| kn | 9 docs, 59k | 13 docs, 83k | 142k |
+
+Wikipedia is encyclopedic, not authoritative guidance: answers need a "valid as of" date and the dataset card must say the Hindi/Kannada slice is Wikipedia-derived. Parser 0.2 drops viewport-overlay modals; `make chunk` yields 1413 en / 477 hi / 178 kn fixed chunks.

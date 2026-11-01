@@ -38,3 +38,17 @@ Many Hindi/Kannada government PDFs use legacy non-Unicode fonts (extract as garb
 ## Redistribution fallback
 If text cannot be redistributed: release labels, spans, verbatim `quote`s (check they are short enough to be fair use / permitted), URLs, hashes, fetch scripts, and Internet Archive snapshot URLs where permitted. Many government sites carry no explicit licence: do not assume 'public' means 'reusable'; read the site's content/copyright policy and record the quote of the clause in `notes`.
 Add manifest columns: `parse_status, role (labelled|distractor), snapshot_url, pair_id`.
+
+## Existing third-party datasets reviewed (2026-11-01)
+Searched Kaggle, Hugging Face and IEEE DataPort for reusable Hindi/Kannada citizen-service data. Verdicts are drafts; licences must be re-checked on each page before use.
+
+| Dataset | What it is | Verdict |
+|---|---|---|
+| HF `Shree0804/Multilingual_Government_Schemes_Dataset` (1,213 rows) | myScheme-style schemes; Hindi body in `details_hi`; Kannada only names/tags | No licence stated, no card, many garbled Hindi/Kannada rows: **do not use** as corpus or labels |
+| IEEE DataPort JanMitra (4,706 schemes; 6,000 queries x 6 langs) | Template-generated queries over scraped myScheme; synthetic profiles | Subscription/login required, no licence stated, queries template-made not human: **not usable as gold**; at most a related-work citation |
+| HF scraped myScheme sets (`*/gov_myscheme`) | Third-party scrapes of the same source we ingest directly | Redundant; our own attributed pull is cleaner |
+| IndicGenBench XQuAD-IN / XorQA-IN (Google) | Human-translated extractive QA over Wikipedia passages, hi and kn included | Possible **external sanity check** for the retriever/judge on hi/kn (different domain); verify licence per card (XorQA card says MIT; XQuAD-IN field blank) |
+| MILU (AI4Bharat) | Multiple-choice exam benchmark, CC BY 4.0, gated | Not a RAG corpus; skip |
+| No Kaggle dataset found for hi/kn scheme text | | |
+
+Takeaway: no ready-made licensed corpus replaces our own. Wikipedia (CC BY-SA 4.0) is the fallback for Hindi/Kannada prose (`scripts/discover_wikipedia.py`).
