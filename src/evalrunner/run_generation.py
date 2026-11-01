@@ -74,7 +74,7 @@ def summarize(rows: list[GenRow]) -> dict:
         out[lang] = {"n_answerable": len(ans), "number_recall": mean([r.number_recall for r in ans]),
                      "n_with_numbers": sum(r.number_recall is not None for r in ans), "refusal_rate_answerable": mean([r.refused for r in ans]),
                      "cited_gold_rate": mean([r.cited_gold for r in ans]), "n_unanswerable": len(un),
-                     "abstention_unanswerable": mean([r.refused for r in un]) if un else None,
+                     "abstention_unanswerable": mean([r.refused for r in un]) if un and all(r.mode == "rag" for r in un) else None,  # closed-book has no refusal mechanism: n/a, not 0
                      "tokens_in": sum(r.in_tokens for r in rs), "tokens_out": sum(r.out_tokens for r in rs)}
     return out
 

@@ -66,3 +66,9 @@ def test_batch_decisions_non_interactive(tmp_path):
         raise AssertionError("expected not-pending error")
     except ValueError as e:
         assert "not pending" in str(e)
+
+
+def test_decision_edit_text_may_contain_commas():
+    from review_drafts import parse_decisions
+    d = parse_decisions("q1=a, q2=e:How is it processed?::Verified, forwarded, reviewed, and paid., q3=r")
+    assert d["q2"] == ("e", "How is it processed?", "Verified, forwarded, reviewed, and paid.") and d["q3"][0] == "r" and d["q1"][0] == "a"

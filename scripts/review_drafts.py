@@ -84,8 +84,11 @@ def pending(items: list[dict], gold_dir: Path = GOLD) -> list[dict]:
 
 def parse_decisions(spec: str) -> dict[str, tuple[str, str, str]]:
     """'id=a, id=r, id=s, id=e:new question::new answer' (comma/newline separated; edit text may not contain a comma-then-id)."""
+    import re
+
     out = {}
-    for part in [p.strip() for p in spec.replace("\n", ",").split(",") if p.strip()]:
+    # split on newlines or on a comma that is followed by "<id>=" so edit text may itself contain commas
+    for part in [p.strip() for p in re.split(r"\n|,\s*(?=[\w-]+=)", spec) if p.strip()]:
         iid, _, rest = part.partition("=")
         if rest[:1] == "e" and ":" in rest:
             q, _, a = rest[2:].partition("::")
