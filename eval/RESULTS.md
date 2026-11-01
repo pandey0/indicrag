@@ -5,41 +5,41 @@ Reproduce: `make results GOLD=data/gold/dev.jsonl` (regenerates the tables and p
 **Read the limits first.** These are early, small-n numbers on an unreleased pilot set. They show the harness works and rule out nothing beyond what the intervals say.
 
 ## Pilot gold set (`data/gold/dev.jsonl`, not yet released)
-64 items: 42 English (38 answerable + 4 unanswerable) and 22 Hindi, 0 Kannada (out of v1). Questions were LLM-drafted from sampled passages, then validated by one human reviewer (60 agreed, 4 revised, 1 rejected; the reviewer edited three batch-5 questions so that they no longer name their scheme). Single reviewer, so no agreement statistic. Evidence is one span per item (two for none). The index holds the whole local corpus (2,422 chunks from 340 English + 55 Hindi documents plus 22 unused Kannada ones), so every query faces distractors from all documents. Same-language retrieval. Reproduce: `make results GOLD=data/gold/dev.jsonl`.
+75 items: 45 English (41 answerable + 4 unanswerable) and 30 Hindi, 0 Kannada (out of v1). Questions were LLM-drafted from sampled passages, then validated by one human reviewer (75 agreed or revised, 3 rejected over six batches; the reviewer edited three batch-5 questions so that they no longer name their scheme). Batch 6 carried reviewer flags that several answers are time-sensitive or simplified (ECI composition, 2023 appointment law, historical RSBY figures, old-vs-new tax regime); the items were accepted as "what this source says", not as current law. Single reviewer, so no agreement statistic. Evidence is one span per item (none for unanswerable). The index holds the whole local corpus (2,422 chunks from 340 English + 55 Hindi documents plus 22 unused Kannada ones), so every query faces distractors from all documents. Same-language retrieval. Reproduce: `make results GOLD=data/gold/dev.jsonl`.
 
-## Retrieval (fixed 512-token-budget chunks, 64 overlap); the 60 answerable items
+## Retrieval (fixed 512-token-budget chunks, 64 overlap); the 71 answerable items
 | retriever | n | recall@1 | recall@5 | MRR | nDCG@10 |
 |---|---|---|---|---|---|
-| BM25 (word) | 60 | 0.650 | 0.917 | 0.770 | 0.822 |
-| BM25 (char 3-5-gram) | 60 | 0.700 | 0.917 | 0.799 | 0.835 |
-| dense (multilingual-e5-small) | 60 | 0.600 | 0.950 | 0.744 | 0.797 |
-| hybrid (BM25 + e5-small, RRF k=60) | 60 | 0.667 | 0.967 | 0.796 | 0.840 |
-| dense (bge-m3) | 60 | 0.633 | 0.950 | 0.761 | 0.802 |
-| hybrid (BM25 + bge-m3, RRF k=60) | 60 | 0.667 | 0.950 | 0.792 | 0.829 |
+| BM25 (word) | 71 | 0.690 | 0.930 | 0.795 | 0.837 |
+| BM25 (char 3-5-gram) | 71 | 0.732 | 0.930 | 0.820 | 0.851 |
+| dense (multilingual-e5-small) | 71 | 0.620 | 0.958 | 0.759 | 0.808 |
+| hybrid (BM25 + e5-small, RRF k=60) | 71 | 0.704 | 0.972 | 0.817 | 0.853 |
+| dense (bge-m3) | 71 | 0.676 | 0.958 | 0.787 | 0.823 |
+| hybrid (BM25 + bge-m3, RRF k=60) | 71 | 0.704 | 0.958 | 0.814 | 0.844 |
 
-By language, recall@1 (en n=38 / hi n=22): BM25 0.526 / 0.864; char-BM25 0.579 / 0.909; dense e5 0.474 / 0.818; hybrid e5 0.579 / 0.818; dense bge-m3 0.553 / 0.773; hybrid bge-m3 0.553 / 0.864.
+By language, recall@1 (en n=41 / hi n=30): BM25 0.537 / 0.900; char-BM25 0.585 / 0.933; dense e5 0.488 / 0.800; hybrid e5 0.585 / 0.867; dense bge-m3 0.561 / 0.833; hybrid bge-m3 0.561 / 0.900.
 
-**What moved when the set grew from 41 to 64 items:** recall@1 fell for every system (BM25 0.756 -> 0.650). The cause is the 19 answerable batch-5 items: BM25 recall@1 is 0.29 on the 14 English ones versus 0.76 on the earlier 41 items. They are mostly procedural questions ("where do I submit the form", "which documents", "how is an application processed") against hundreds of myScheme pages built from the same step templates, and three of them (edited by the reviewer) no longer name a scheme, which makes them unresolvable from the query alone. So the pool is harder, not the retrievers worse; absolute numbers depend on the question mix.
+Earlier note (set grew 41 -> 64): recall@1 fell because the batch-5 procedural myScheme questions are hard against hundreds of template-sharing pages, and three have no scheme name in the query. Adding batch 6 (11 items, mostly national-scheme and Wikipedia facts) moved BM25 recall@1 back up to 0.690. Absolute numbers depend on the question mix, not only on the retrievers.
 
 ## Paired comparisons (95% paired-bootstrap CI on the per-item difference)
-`make results` prints all 15 pairs per metric for recall@1 and MRR (30 comparisons). **On recall@1 no pair excludes 0.** On MRR exactly one does: e5-small hybrid vs e5-small dense (hybrid +0.052, CI [+0.010, +0.098]); its recall@1 interval is [0.000, +0.150]. Selected recall@1 differences: e5 hybrid - e5 dense +0.067 [0.000, +0.150]; bge-m3 hybrid - bge-m3 dense +0.033 [-0.067, +0.133]; bge-m3 dense - e5 dense +0.033 [-0.117, +0.183]; char-BM25 - BM25 +0.050 [0.000, +0.117]; e5 hybrid - BM25 +0.017 [-0.083, +0.133].
+`make results` prints all 15 pairs per metric for recall@1 and MRR (30 comparisons). Two intervals exclude 0, both the same pair: e5-small hybrid vs e5-small dense, recall@1 +0.085 [+0.014, +0.155] and MRR +0.058 [+0.019, +0.101]. Other recall@1 differences: bge-m3 hybrid - bge-m3 dense +0.028 [-0.056, +0.113]; bge-m3 dense - e5 dense +0.056 [-0.070, +0.183]; char-BM25 - BM25 +0.042 [0.000, +0.099]; e5 hybrid - BM25 +0.014 [-0.070, +0.099].
 
-**Interpretation, conservatively.** One MRR interval out of 30 comparisons excluding 0 is about what chance gives (5% of 30 is roughly 1.5), there was no pre-registered primary comparison, and the same gap does not appear with bge-m3. Nothing here separates BM25, character BM25, dense or hybrid, or bge-m3 from e5-small. All six place the gold passage in the top 5 for 92-97% of items, so differences concern only the top rank.
+**Interpretation, conservatively.** The e5 hybrid-over-dense gap is now nominally significant, but it is one pair of 15 (two correlated metrics), nothing was pre-registered, about 1.5 of 30 intervals would exclude 0 by chance, and the same gap does not appear with bge-m3. Nothing separates BM25, character BM25 or hybrid, or bge-m3 from e5-small. All six place the gold passage in the top 5 for 93-97% of items, so differences concern only the top rank.
 
 ## End-to-end generation (claude-haiku-5-5, BM25 top-5) — deterministic scoring, no judge
-Command: `python -m src.evalrunner.run_generation` (needs `ANTHROPIC_API_KEY`). **Number recall** = share of the gold answer's numbers (Indic digits normalised) present in the model's answer: an objective but weak correctness proxy, so only the 37 answerable items whose gold answer has numbers (22 en, 15 hi) are scored for correctness. No faithfulness or fluency judgement: the only judge available is the same model family as the generator, which `docs/05` forbids.
+Command: `python -m src.evalrunner.run_generation` (needs `ANTHROPIC_API_KEY`). **Number recall** = share of the gold answer's numbers (Indic digits normalised) present in the model's answer: an objective but weak correctness proxy, so only the 45 answerable items whose gold answer has numbers (25 en, 20 hi) are scored for correctness. No faithfulness or fluency judgement: the only judge available is the same model family as the generator, which `docs/05` forbids.
 
-| mode | number recall (n=37) | en (n=22) | hi (n=15) | refusals on answerable (60) | cited chunk hits gold span | abstention on unanswerable (n=4) |
+| mode | number recall (n=45) | en (n=25) | hi (n=20) | refusals on answerable (71) | cited chunk hits gold span | abstention on unanswerable (n=4) |
 |---|---|---|---|---|---|---|
-| RAG (retrieve + validated citations) | 0.928 | 0.902 | 0.967 | 0 | 0.883 (53 of 60) | 4/4 |
-| closed-book (same model, no passages) | 0.545 | 0.379 | 0.789 | n/a | n/a | n/a (no refusal mechanism) |
+| RAG (retrieve + validated citations) | 0.941 | 0.927 | 0.958 | 1 (`b4-hi-004`) | 0.873 (62 of 71) | 4/4 |
+| closed-book (same model, no passages) | 0.598 | 0.373 | 0.879 | n/a | n/a | n/a (no refusal mechanism) |
 
-Paired difference (RAG - closed-book, 37 items): +0.383, 95% bootstrap CI [+0.234, +0.541]. RAG misses: `b2-en-016`, `b3-en-009`, `b3-en-010`, `b4-hi-011` (partial numbers) and `b5-en-017` (the reviewer-edited question "What is the maximum assistance per student?" names no scheme, so retrieval cannot know which scheme is meant). 7 answers cited a chunk that did not hit the gold span. Tokens: RAG 287k, closed-book 54k.
+Paired difference (RAG - closed-book, 45 items): +0.343, 95% bootstrap CI [+0.217, +0.476]. RAG misses (number recall < 1): `b3-en-009`, `b3-en-010`, `b4-hi-011`, `b4-hi-023`, `b5-en-017` (the reviewer-edited question names no scheme, so retrieval cannot know which is meant). Tokens: RAG 324k in, closed-book 13k in. A repeat run on the same 75 items gave RAG 0.959 overall versus 0.941 here, so run-to-run model variation is about 0.02 and should be treated as noise floor.
 
-**Read this carefully.** (1) The retrieval benefit is real but smaller than first measured (earlier +0.66 on 29 items), because the larger set includes questions the model can partly guess. (2) **Closed-book Hindi recall is 0.79, far above English 0.38**: many Hindi items concern well-known national schemes (MGNREGA 100 days, Ayushman 5 lakh, PMJJBY 18-50) that the model knows, so the Hindi slice tests retrieval less than the English myScheme slice does; Hindi RAG-vs-closed gaps are not comparable with English ones. (3) Abstention 4/4 is on n=4 author-chosen questions about named but obscure schemes (95% Wilson lower bound about 0.51); it says the pipeline can refuse, not how reliably it does. (4) Same-family generation, one reviewer, number recall only.
+**Read this carefully.** (1) The retrieval benefit is real but smaller than first measured (earlier +0.66 on 29 items, +0.38 on 37), because the larger set includes questions the model can partly guess. (2) **Closed-book Hindi recall is 0.88, far above English 0.37**: many Hindi items concern well-known national schemes (MGNREGA 100 days, Ayushman 5 lakh, PMJJBY 18-50) that the model knows, so the Hindi slice tests retrieval less than the English myScheme slice does; Hindi RAG-vs-closed gaps are not comparable with English ones. (3) Abstention 4/4 is on n=4 author-chosen questions about named but obscure schemes (95% Wilson lower bound about 0.51); it says the pipeline can refuse, not how reliably it does. (4) Same-family generation, one reviewer, number recall only.
 
 ## Why not to over-read any of this
-- One reviewer, drafted-then-validated questions (shared vocabulary with their passages favours lexical retrieval), one chunking, small models, n=60/64.
+- One reviewer, drafted-then-validated questions (shared vocabulary with their passages favours lexical retrieval), one chunking, small models, n=71 answerable / 75 total.
 - The Hindi corpus is mostly Wikipedia; English is mostly myScheme state-scheme pages, so the two languages are different kinds of test, not a clean cross-language comparison.
 - Not yet run: long-context baseline, other chunk sizes, human-paraphrased questions, a judge from another model family, answer faithfulness.
 

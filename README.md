@@ -67,7 +67,7 @@ make test
 The corpus is fetched by the ingest scripts under each source's terms and is never committed or baked into images.
 
 ## Results
-Early, small-n measurements are in [`eval/RESULTS.md`](eval/RESULTS.md): 64 human-validated pilot items (English and Hindi), six retrieval configurations, a RAG vs closed-book generation test, injection tests and an agent comparison. At this sample size the retrieval configurations are statistically indistinguishable (all place the gold passage in the top 5 for 92-97% of items); retrieval clearly helps generation (closed-book number recall 0.55 vs 0.93 with retrieval), but the Hindi slice is partly guessable from model knowledge, and an agent showed no advantage over plain RAG on the tasks tried. The gold set is not released and these numbers are not a benchmark yet.
+Early, small-n measurements are in [`eval/RESULTS.md`](eval/RESULTS.md): 75 human-validated pilot items (English and Hindi), six retrieval configurations, a RAG vs closed-book generation test, injection tests and an agent comparison. At this sample size the retrieval configurations are statistically indistinguishable (all place the gold passage in the top 5 for 93-97% of items); retrieval clearly helps generation (closed-book number recall 0.60 vs 0.94 with retrieval), but the Hindi slice is partly guessable from model knowledge, and an agent showed no advantage over plain RAG on the tasks tried. The gold set is not released and these numbers are not a benchmark yet.
 
 ## Scope, limitations and responsible use
 - Uses only public documents whose licence/terms permit it; the licence decision for each source is recorded in the manifest. Text is redistributed only where allowed; otherwise labels, spans and fetch scripts are released.
