@@ -33,3 +33,7 @@ BM25 runs on `fixed_512_64` chunks. Observed issues to address before any number
 - **Storage:** `chunk_embeddings(chunk_id, model, dim, embedding)`; index per model. Embedding is idempotent: skip (chunk_id, model) pairs already stored. Batches seeded/deterministic (CPU inference).
 - **Retrievers:** `DenseRetriever` (in-memory numpy brute force for evaluation reproducibility; pgvector for the app) and hybrid RRF with BM25 (`rrf`, k=60).
 - **Acceptance:** unit tests with a fake embedder (prefix handling, normalisation, idempotence, ranking); smoke test on the real model only after install; no quality numbers until gold items exist.
+
+## Eval runner smoke test (2026-11-01) — pipeline check, NOT a result
+`src.evalrunner.run_retrieval` ran end-to-end on 11 LLM-drafted, human-unreviewed pilot items (5 en, 6 hi) for `bm25` and `bm25char` (recall@5 = 1.0 for both). These numbers say nothing about retrieval quality: n is tiny, and drafted questions are written while looking at the gold passage, so they share vocabulary with it (lexical leakage favours BM25). Real comparisons need >= 100 human-validated items per language, with questions written independently of the evidence picker (docs/04). Drafts live in `data/gold/drafts/` (gitignored) with `review_status: unreviewed`.
+The pilot sheet sampler now filters for service-relevant passages (eligibility/benefit/process keywords); Kannada yields only 10 candidates under that filter, so Kannada pairs will come mainly from aligned en twins.
