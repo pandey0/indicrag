@@ -26,6 +26,12 @@ def numeric_consistent(src: str, tgt: str) -> bool:
     return numbers(src) <= numbers(tgt)
 
 
+def numeric_coverage(src: str, tgt: str) -> float:
+    """Share of the English quote's numbers found in the target paragraph (1.0 when the quote has none)."""
+    a = numbers(src)
+    return len(a & numbers(tgt)) / len(a) if a else 1.0
+
+
 @dataclass
 class Alignment:
     char_start: int
@@ -33,6 +39,7 @@ class Alignment:
     text: str
     score: float
     numeric_ok: bool
+    numeric_coverage: float = 1.0
 
 
 def paragraphs(text: str, min_chars: int = 40) -> list[tuple[int, int, str]]:
@@ -52,4 +59,4 @@ def best_alignment(src_quote: str, tgt_text: str, embedder, top: int = 3) -> lis
     m = embedder.encode([p[2] for p in paras], "passage")
     sims = m @ q
     order = np.argsort(-sims, kind="stable")[:top]
-    return [Alignment(paras[i][0], paras[i][1], paras[i][2], float(sims[i]), numeric_consistent(src_quote, paras[i][2])) for i in order]
+    return [Alignment(paras[i][0], paras[i][1], paras[i][2], float(sims[i]), numeric_consistent(src_quote, paras[i][2]), numeric_coverage(src_quote, paras[i][2])) for i in order]

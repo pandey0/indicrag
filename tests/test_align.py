@@ -33,3 +33,9 @@ def test_best_alignment_picks_matching_paragraph():
     assert res[0].numeric_ok and res[0].score > res[1].score and "ಸಾಲ" in res[0].text
     assert tgt[res[0].char_start:res[0].char_end] == res[0].text
     assert len(paragraphs("short\n" + "x" * 50)) == 1
+
+
+def test_numeric_coverage():
+    from src.evalrunner.align import numeric_coverage
+    assert numeric_coverage("passed 15 June 2005, in force 12 October 2005", "2005ರ ಜೂನ್ 15") == 2 / 3
+    assert numeric_coverage("no numbers here", "anything") == 1.0

@@ -25,7 +25,7 @@ def load_manifest(path: Path) -> dict[str, dict]:
         return {r["source_id"]: r for r in csv.DictReader(f)}
 
 
-def validate_items(items: list[dict], manifest: dict[str, dict], data_dir: Path) -> list[str]:
+def validate_items(items: list[dict], manifest: dict[str, dict], data_dir: Path, check_answer_numbers: bool = False) -> list[str]:
     errors: list[str] = []
     validator = Draft7Validator(json.loads(SCHEMA.read_text(encoding="utf-8")))
     seen: set[str] = set()
@@ -47,6 +47,12 @@ def validate_items(items: list[dict], manifest: dict[str, dict], data_dir: Path)
             errors.append(f"{tag}: kn item must be aligned_parallel or native_verified (no authored-Kannada claim)")
         if it.get("writer") and it.get("labeller") and it["writer"] == it["labeller"] and it.get("source_kind") == "hand_written":
             pass  # same person writing and picking is allowed only when marked; reported as a warning elsewhere
+        if check_answer_numbers and it.get("evidence"):
+            from .align import numbers  # numbers in the answer should be supported by the evidence quotes
+
+            missing = numbers(it.get("answer", "")) - set().union(*(numbers(e.get("quote", "")) for e in it["evidence"]))
+            if missing:
+                errors.append(f"{tag}: answer numbers not in evidence quotes: {sorted(missing)}")
         for ev in it.get("evidence") or []:
             row = manifest.get(ev.get("doc_id"))
             if row is None or not row.get("text_path"):
@@ -72,9 +78,10 @@ def main() -> int:
     ap.add_argument("gold")
     ap.add_argument("--manifest", default="data/corpus_manifest.csv")
     ap.add_argument("--data-dir", default="data")
+    ap.add_argument("--check-answer-numbers", action="store_true")
     a = ap.parse_args()
     items = [json.loads(l) for l in open(a.gold, encoding="utf-8") if l.strip()]
-    errs = validate_items(items, load_manifest(Path(a.manifest)), Path(a.data_dir))
+    errs = validate_items(items, load_manifest(Path(a.manifest)), Path(a.data_dir), a.check_answer_numbers)
     for e in errs:
         print(e)
     print(f"{len(items)} items, {len(errs)} problems")

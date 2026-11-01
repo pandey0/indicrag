@@ -49,3 +49,10 @@ def test_rules(tmp_path):
     assert any("needs aligned_with" in e for e in validate_items([kn], man, tmp_path))
     noev = copy.deepcopy(item); noev["id"] = "q3"; noev["evidence"] = []
     assert any("needs evidence" in e for e in validate_items([noev], man, tmp_path))
+
+
+def test_answer_number_grounding(tmp_path):
+    item, man = make(tmp_path)
+    item["answer"] = "Within 30 days."
+    assert validate_items([item], man, tmp_path) == []
+    assert any("answer numbers not in evidence" in e for e in validate_items([item], man, tmp_path, check_answer_numbers=True))

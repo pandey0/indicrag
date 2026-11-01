@@ -24,6 +24,7 @@ ap.add_argument("--min-chars", type=int, default=150)
 ap.add_argument("--max-chars", type=int, default=700)
 ap.add_argument("--seed", type=int, default=7)
 ap.add_argument("--prefix", default="wp_", help="doc_id prefix to draw from (default: Wikipedia fallback corpus)")
+ap.add_argument("--kn-twins-only", action="store_true", help="only articles whose pair has a parsed Kannada twin (so aligned kn items are possible)")
 ap.add_argument("--out", default="data/labelling/pilot_sheet.csv")
 a = ap.parse_args()
 
@@ -46,9 +47,12 @@ def relevant(text: str, lang: str) -> bool:
     return sum(k in t for k in KEYWORDS[lang]) >= 2 and text.rstrip().endswith((".", "\u0964", "?")) and "launching" not in t[:80]
 
 
+twin_pairs = {pairs[s_] for s_ in man if s_.endswith("_kn") and s_ in pairs}
 cands = defaultdict(list)
 for sid, r in man.items():
     if not sid.startswith(a.prefix):
+        continue
+    if a.kn_twins_only and pairs.get(sid) not in twin_pairs:
         continue
     text = Path("data", r["text_path"]).read_text(encoding="utf-8")
     pos = 0

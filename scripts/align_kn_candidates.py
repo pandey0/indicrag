@@ -33,7 +33,7 @@ for line in open(gold, encoding="utf-8"):
     for rank, a in enumerate(best_alignment(ev["quote"], text, emb, top=3), 1):
         rows.append({"en_item": it["id"], "en_question": it["question"], "en_quote": ev["quote"], "kn_doc": twin, "rank": rank,
                      "char_start": a.char_start, "char_end": a.char_end, "alignment_score": round(a.score, 4),
-                     "numeric_ok": a.numeric_ok, "kn_text": a.text, "native_verdict": ""})
+                     "numeric_ok": a.numeric_ok, "numeric_coverage": round(a.numeric_coverage, 2), "kn_text": a.text, "native_verdict": ""})
 out = Path("data/labelling/kn_alignment_candidates.csv")
 with open(out, "w", newline="", encoding="utf-8") as f:
     w = csv.DictWriter(f, fieldnames=list(rows[0])) if rows else None
