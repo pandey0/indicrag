@@ -61,3 +61,6 @@ Documents are untrusted input (indirect injection).
 
 ## 9. Deliberate non-goals (say this in the README)
 No authentication or multi-tenancy, no SLA/HA or autoscaling, no formal threat model or pen-test, no compliance certification, no real user data. The project supports the claim "reference implementation with measured quality and basic abuse/privacy controls", not "production service".
+
+## Injection harness status
+`data/injection/cases.jsonl` (12 en/hi cases, canary strings) and `src.evalrunner.injection` implement the attack-success-rate metric. CI tests use scripted providers and show what the pipeline does and does NOT guarantee: it withholds answers without valid citations (so an obedient but uncited reply never reaches the user), but a model that obeys the injection and still cites a passage passes through, so ASR for a real model must be measured (`python -m src.evalrunner.injection`, needs `ANTHROPIC_API_KEY`) and reported with its small n. No such measurement exists yet.
