@@ -48,3 +48,17 @@ Paired difference (agent - plain): -0.100, 95% bootstrap CI [-0.233, +0.033]. Wi
 **Reading.** On these tasks the agent shows no accuracy advantage and costs about 4x the tokens; its failures were budget exhaustion, not wrong answers (the interval includes 0, so "plain is better" is also not established). The earlier agent run on the same tasks scored 0.967 (29/30); the drop to 0.867 comes from the provider fix, which makes some steps cost more (a retry counts its extra tokens) so more runs hit the fixed 20k budget, plus run-to-run variance (no `temperature`). I am not raising the budget now and re-reporting, because that would be tuning on the report set; a budget sweep belongs on a fresh task set.
 
 **Why the tasks favour plain RAG:** every task is single-document, scoped to one or two numeric criteria that the question names, so a capable model can do the comparison in its head. The agent's design value (deterministic rules, guards, traces, auditability) is not what these tasks measure; tasks with several interacting criteria, missing-attribute follow-ups, or arithmetic-heavy income rules would test it. Not run: Hindi/Kannada tasks, other models, human-reviewed tasks.
+
+## Harder task set (12 tasks, `scripts/build_agent_tasks_hard.py`), same conditions, tasks fixed before the run
+Designed to stress what the agent was supposed to add: monthly-to-annual income arithmetic, two criteria at once, rural/urban thresholds, age relaxation by category (+5 SC/ST, +3 OBC), and a missing attribute.
+
+**Task defect found by reading the failures:** `agt-h08` (income exactly ₹25,000, expected not eligible because the page says "less than ₹25000") was failed by both systems, and the Gatidhara page also says "income of ₹25000/- or less would qualify", so the source contradicts itself and my strict-`<` gold is unsafe. It is marked `excluded` (reason stored in the file), skipped by `load_tasks` by default, and the exclusion was decided from the source text, not from model behaviour. Both numbers are reported.
+
+| system | success on 11 valid tasks | on all 12 | mean tokens (11) | failures (valid tasks) |
+|---|---|---|---|---|
+| plain RAG | 10/11 = 0.91 | 10/12 | 4.1k | `agt-h06` said "unknown" (urban income ₹1,30,000, expected eligible) |
+| agent | 9/11 = 0.82 | 9/12 | 10.1k | `agt-h05` hit the 20k token budget; `agt-h06` returned a wrong decision (not eligible) |
+
+Paired difference (agent - plain): -0.09, 95% CI [-0.27, 0.00]. Zero tasks where only the agent succeeded.
+
+**Reading.** Even on tasks built to need arithmetic and multi-criterion reasoning, the agent did not beat plain RAG, and cost about 2.5x the tokens. The one wrong agent decision (`agt-h06`) is the informative failure: the agent evaluated rules but not with the urban threshold the question calls for (the deterministic engine only helps if the criteria it is given are right). The arithmetic and relaxation tasks (`h01`, `h02`, `h03`, `h09`, `h10`, `h11`) were solved by both. n=11 and one model: this does not show the agent is worse, and it does not show a benefit. It shows the claimed advantage was not demonstrated by this task family, so no "agent improves eligibility answers" claim is supported.

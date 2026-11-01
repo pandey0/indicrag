@@ -15,8 +15,10 @@ from src.agent.rules import evaluate_rules
 from src.agent.tools import ToolContext
 
 
-def load_tasks(path: str | Path = "data/agent/tasks.jsonl") -> list[dict]:
-    return [json.loads(line) for line in open(path, encoding="utf-8") if line.strip()]
+def load_tasks(path: str | Path = "data/agent/tasks.jsonl", include_excluded: bool = False) -> list[dict]:
+    """Tasks with an `excluded` reason (e.g. the source contradicts itself) are skipped unless include_excluded."""
+    rows = [json.loads(line) for line in open(path, encoding="utf-8") if line.strip()]
+    return rows if include_excluded else [t for t in rows if not t.get("excluded")]
 
 
 def validate_tasks(tasks: list[dict], manifest: dict[str, dict], data_dir: Path = Path("data")) -> list[str]:

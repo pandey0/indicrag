@@ -76,3 +76,10 @@ def test_plain_rag_baseline_parsing_and_scoring():
     assert out["aggregate"]["success"] == 1.0 and out["items"][0]["retrieved_gold_doc"] is True
     never = EchoProvider(lambda s, u: "no verdict line at all")
     assert run_plain_rag_tasks(tasks, m, chunks, never)["aggregate"]["success"] == 0.0
+
+
+def test_excluded_tasks_are_skipped_by_default(tmp_path):
+    p = tmp_path / "t.jsonl"
+    p.write_text(json.dumps({"id": "a"}) + "\n" + json.dumps({"id": "b", "excluded": "source contradicts itself"}) + "\n", encoding="utf-8")
+    assert [t["id"] for t in load_tasks(p)] == ["a"]
+    assert len(load_tasks(p, include_excluded=True)) == 2
