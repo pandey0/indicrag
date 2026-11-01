@@ -170,6 +170,9 @@ def run(sources_path: Path, cfg: Config | None = None, only: set[str] | None = N
                 secs.append({"path": sec.path, "char_start": sec.char_start, "char_end": sec.char_end, "lang": st})
             write_json(out / f"{psha}.sections.json", secs)
             row.update(parsed_sha256=psha, n_chars=len(text), text_path=str((out / f"{psha}.txt").relative_to(cfg.data_dir)))
+            if row.get("parse_status") == "ok" and len(text) < cfg.min_content_chars:
+                # passed the page-level gate only because site chrome counted as text: an empty shell, not a document
+                row.update(parse_status="fail", notes=(row.get("notes", "") + f" | only {len(text)} chars after boilerplate removal (empty shell?)").strip(" |"))
             dropped = sum(len(b.text) for b in docs[sid]) - len(text) + len(blocks) - len(docs[sid])
             log.debug("%s: boilerplate removed %d chars", sid, -dropped)
     write_manifest(cfg.manifest_path, manifest)

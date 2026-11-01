@@ -20,6 +20,7 @@ class Config:
     ocr_workers: int = int(os.environ.get("OCR_WORKERS", "4"))
     tesseract_bin: str | None = os.environ.get("TESSERACT_BIN")
     chrome_bin: str = os.environ.get("CHROME_BIN", "/usr/bin/google-chrome")
+    min_content_chars: int = 450       # post-boilerplate floor; site-chrome shells measured <= 418 chars, shortest real page ~580
     agreement_threshold: float = 0.3   # text-layer vs OCR word overlap below this => layer untrusted
 
     @property

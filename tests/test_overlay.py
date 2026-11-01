@@ -17,3 +17,9 @@ def test_wikipedia_references_and_navboxes_dropped():
     text = " ".join(b.text for b in extract_html(html).blocks)
     assert "fixed amount every month" in text
     assert "Study on Implementation" not in text and "Related schemes" not in text and "Retrieved" not in text
+
+
+def test_generic_or_empty_title_falls_back_to_h1():
+    html = "<html><head><title>UX4G Accessibility Tool</title></head><body><h1><button></button></h1><h1>Old Age Pension Scheme</h1><p>Some body text here that is long enough to matter for the page.</p></body></html>"
+    assert extract_html(html).title == "Old Age Pension Scheme"
+    assert extract_html("<html><head><title>Real Title</title></head><body><p>x</p></body></html>").title == "Real Title"

@@ -43,6 +43,10 @@ class Renderer:
                     page.wait_for_selector(wait_selector, timeout=10000)
                 except Exception:
                     pass
+            try:   # the app shell exists before data loads: wait until a heading actually has text
+                page.wait_for_function("() => [...document.querySelectorAll('h1')].some(h => h.innerText.trim().length > 0)", timeout=20000)
+            except Exception:
+                pass
             page.wait_for_timeout(settle_ms)
             return page.content()
         finally:

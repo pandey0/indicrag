@@ -51,7 +51,7 @@ def write_sources(path: Path, base: str, ids: list[tuple[str, str, str]]):
 
 
 def cfg_for(tmp: Path) -> Config:
-    return Config(data_dir=tmp / "data", host_delay_s=0.0, tesseract_bin="/nonexistent")
+    return Config(data_dir=tmp / "data", host_delay_s=0.0, tesseract_bin="/nonexistent", min_content_chars=0)
 
 
 def test_end_to_end_idempotent_and_robots(site):
@@ -102,3 +102,16 @@ def test_shared_headings_are_protected():
     docs = {f"d{i}": [Block(("Eligibility",), "Eligibility"), Block(("Eligibility",), f"unique content number {i} " * 6)] for i in range(6)}
     out = strip_host_boilerplate(docs)
     assert all(any(b.text == "Eligibility" for b in v) for v in out.values())
+
+
+def test_shell_page_fails_after_boilerplate_gate(site):
+    base, tmp = site
+    src = tmp / "sources.csv"
+    write_sources(src, base, [("a", "p0.html", "hi")])
+    cfg = cfg_for(tmp)
+    cfg.min_content_chars = 10_000                   # page text is far below the floor: treated as an empty shell
+    m = run(src, cfg, use_ocr=False)
+    assert m["a"]["parse_status"] == "fail" and "empty shell" in m["a"]["notes"]
+    cfg2 = cfg_for(tmp)
+    cfg2.min_content_chars = 5                        # same page passes with a sane floor
+    assert run(src, cfg2, use_ocr=False)["a"]["parse_status"] == "ok"

@@ -57,9 +57,28 @@ INLINE_TAGS = {"a", "span", "b", "i", "strong", "em", "small", "sup", "sub", "u"
                "label", "cite", "q", "time", "bdi", "bdo", "wbr", "s", "del", "ins"}
 
 
+GENERIC_TITLES = {"ux4g accessibility tool"}
+
+
+def _pick_title(soup: BeautifulSoup) -> str:
+    """<title> unless empty/generic (site-wide widget titles); then og:title, then the first non-empty h1."""
+    cands = []
+    if soup.title:
+        cands.append(soup.title.get_text(" ", strip=True))
+    og = soup.find("meta", attrs={"property": "og:title"})
+    if og and og.get("content"):
+        cands.append(str(og["content"]))
+    cands += [h.get_text(" ", strip=True) for h in soup.find_all("h1")]
+    for c in cands:
+        c = normalize(c)
+        if c and c.lower() not in GENERIC_TITLES:
+            return c
+    return ""
+
+
 def extract_html(html: str) -> ParsedDoc:
     soup = BeautifulSoup(html, "lxml")
-    title = normalize(soup.title.get_text(" ", strip=True)) if soup.title else ""
+    title = _pick_title(soup)
     for t in soup(DROP_TAGS):
         t.decompose()
     for t in list(soup.find_all(True)):
