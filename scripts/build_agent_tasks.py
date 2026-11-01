@@ -21,7 +21,7 @@ GE = lambda v, attr="age": {"attr": attr, "op": ">=", "value": v}  # noqa: E731
 SPECS = [
     ("ms_ignoapsp", "aged between 60 and 79 years to receive", [B(60, 79)],
      [("I am 65 years old. Am I eligible for the {scheme}?", {"age": 65}, "eligible"),
-      ("My father is 82 years old. Is he eligible for the {scheme}?", {"age": 82}, "not_eligible")]),
+      ("My mother is 55 years old. Is she eligible for the {scheme}?", {"age": 55}, "not_eligible")]),
     ("ms_ignwpsp", "only for widows aged 40", [GE(40)],
      [("I am a 35 year old widow. Am I eligible for the {scheme}?", {"age": 35}, "not_eligible"),
       ("I am a widow. Am I eligible for the {scheme}?", {}, "unknown")]),
@@ -76,6 +76,15 @@ SPECS = [
 ]
 
 
+PHRASE = {"age": "age requirement", "annual_income": "income limit", "monthly_income": "income limit", "parent_annual_income": "parents' income limit",
+          "family_annual_income": "family income limit", "bride_age": "bride's age requirement"}
+
+
+def SCOPE(crit):  # noqa: N802
+    ph = [PHRASE[c["attr"]] for c in crit]
+    return " and the ".join(dict.fromkeys(ph))
+
+
 def sentence(text: str, anchor: str) -> tuple[int, int]:
     i = text.find(anchor)
     assert i >= 0, anchor
@@ -90,6 +99,7 @@ for doc, anchor, crit, scen in SPECS:
     text = Path("data", r["text_path"]).read_text(encoding="utf-8")
     s, e = sentence(text, anchor)
     for k, (scenario, attrs, expect) in enumerate(scen, 1):
+        scenario = scenario.rstrip() + f" Only consider the {SCOPE(crit)} for this check; ignore any other requirements."
         scenario = scenario.format(scheme=man[doc]["title"].replace(" - Wikipedia", "").strip() or doc)
         got = evaluate_rules(crit, attrs)["decision"]
         assert got == expect, (doc, k, got, expect)

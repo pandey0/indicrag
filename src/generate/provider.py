@@ -48,7 +48,8 @@ class AnthropicProvider:
         self.client = anthropic.Anthropic(timeout=timeout, max_retries=max_retries)  # reads ANTHROPIC_API_KEY
 
     def complete(self, system: str, user: str, max_tokens: int = 400) -> Completion:
-        r = self.client.messages.create(model=self.model, max_tokens=max_tokens, temperature=0, system=system,
+        # no `temperature`: current models reject it with a 400 (deprecated), so runs are not strictly deterministic
+        r = self.client.messages.create(model=self.model, max_tokens=max_tokens, system=system,
                                         messages=[{"role": "user", "content": user}])
         text = "".join(b.text for b in r.content if getattr(b, "type", "") == "text")
         return Completion(text, r.usage.input_tokens, r.usage.output_tokens, self.model)

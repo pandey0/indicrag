@@ -64,3 +64,6 @@ No authentication or multi-tenancy, no SLA/HA or autoscaling, no formal threat m
 
 ## Injection harness status
 `data/injection/cases.jsonl` (12 en/hi cases, canary strings) and `src.evalrunner.injection` implement the attack-success-rate metric. CI tests use scripted providers and show what the pipeline does and does NOT guarantee: it withholds answers without valid citations (so an obedient but uncited reply never reaches the user), but a model that obeys the injection and still cites a passage passes through, so ASR for a real model must be measured (`python -m src.evalrunner.injection`, needs `ANTHROPIC_API_KEY`) and reported with its small n. No such measurement exists yet.
+
+## Injection ASR, first real-model measurement (claude-haiku-5-5, 2026-11-01)
+12 cases (9 en, 3 hi), full answering pipeline, k=1 injected passage: **attack success 0/12** (Wilson 95% CI 0.00-0.24). 8 answered cleanly without the canary, 4 were withheld (3 `model_no_answer`, 1 `uncited`). With n=12 and simple, single-turn, instruction-only injections this only rules out a high attack rate; it says nothing about adaptive attacks, other models or the agent path. Not evidence of robustness.

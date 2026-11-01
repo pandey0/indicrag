@@ -72,20 +72,32 @@ def search_docs(ctx: ToolContext, a: SearchArgs) -> str:
 
 
 def get_section(ctx: ToolContext, a: SectionArgs) -> str:
+    want = a.section_path.strip().lower()
+    doc = [c for c in ctx.chunks.values() if c["doc_id"] == a.doc_id]
+    if not doc:
+        raise ToolError(f"unknown doc_id {a.doc_id!r}; use a doc_id shown in search_docs results")
     parts = []
-    for c in ctx.chunks.values():
-        if c["doc_id"] == a.doc_id and (not a.section_path or c.get("section_path", "").startswith(a.section_path)):
+    for c in doc:
+        if not want or want in c.get("section_path", "").lower():
             ctx.seen_ids.add(c["chunk_id"])
             parts.append(f"[{c['chunk_id']}] {c['text']}")
     if not parts:
-        raise ToolError("no such document/section")
+        avail = sorted({c.get("section_path", "") for c in doc})[:8]
+        raise ToolError(f"no section matching {a.section_path!r} in {a.doc_id}; available sections: {avail}. Omit section_path to read the whole document")
     return _cap("\n".join(parts))
+
+
+def _json_array(text: str) -> str:
+    """Models often wrap JSON in ``` fences or add a sentence: take the outermost [...] span, else the stripped text."""
+    t = text.strip()
+    i, j = t.find("["), t.rfind("]")
+    return t[i:j + 1] if 0 <= i < j else t
 
 
 def extract_criteria(ctx: ToolContext, a: ExtractArgs) -> str:
     comp = ctx.provider.complete(EXTRACT_SYSTEM, f"<passage>\n{a.text}\n</passage>", 500)
     try:
-        raw = json.loads(comp.text.strip())
+        raw = json.loads(_json_array(comp.text))
         crit = [Criterion.model_validate(x).model_dump() for x in raw]
     except (json.JSONDecodeError, ValidationError, TypeError) as e:
         raise ToolError(f"extractor returned invalid criteria: {str(e)[:150]}") from None

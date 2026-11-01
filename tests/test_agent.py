@@ -59,7 +59,22 @@ def test_too_many_errors_and_non_json():
 
 def test_loop_detection():
     a = J({"tool": "search_docs", "args": {"query": "age"}})
-    assert run_agent("x", ctx(), scripted(a, a)).stop_reason == "loop"
+    assert run_agent("x", ctx(), scripted(a, a, a)).stop_reason == "loop"
+    # one repeat is fed back and the agent can recover
+    ok = run_agent("x", ctx(), scripted(a, a, J({"final": {"answer": "could not find", "citations": [], "decision": "n/a"}})))
+    assert ok.stop_reason == "final" and ok.steps[1].error == "repeated identical call"
+
+
+def test_get_section_lists_available_sections_on_miss():
+    from src.agent.tools import ToolError, call_tool
+    c = ctx()
+    assert "Ration card holders" in call_tool(c, "get_section", {"doc_id": "other"})
+    for args, needle in (({"doc_id": "pmjjby", "section_path": "Nope"}, "available sections"), ({"doc_id": "zzz"}, "unknown doc_id")):
+        try:
+            call_tool(c, "get_section", args)
+            raise AssertionError("expected ToolError")
+        except ToolError as e:
+            assert needle in str(e)
 
 
 def test_budgets():
@@ -93,3 +108,11 @@ def test_parse_action_rules():
             raise AssertionError(bad)
         except ValueError:
             pass
+
+
+def test_extractor_output_in_code_fences_is_accepted():
+    fenced = "Here you go:\n```json\n" + json.dumps(CRIT) + "\n```"
+    run = run_agent("x", ctx(extractor=lambda s, u: fenced), scripted(
+        J({"tool": "extract_criteria", "args": {"text": "some long enough eligibility text here"}}),
+        J({"final": {"answer": "ok", "citations": [], "decision": "unknown"}})))
+    assert run.steps[0].error == "" and '"attr": "age"' in run.steps[0].result
