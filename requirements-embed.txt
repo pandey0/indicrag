@@ -1,6 +1,6 @@
 # Dense retrieval extras (CPU). Install: python3 -m venv .venv && .venv/bin/pip install -r requirements-embed.txt \
 #   --extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.4.1
+torch==2.6.0
 sentence-transformers==3.1.1
 numpy<2
 psycopg2-binary
