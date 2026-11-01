@@ -29,3 +29,4 @@ data/gold/.reviewed
 data/gold/rejected.jsonl
 data/labelling/pilot_sheet_ms2.csv
 data/labelling/pilot_sheet_hi3.csv
+data/labelling/pilot_sheet_b6.csv

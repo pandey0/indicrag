@@ -42,9 +42,9 @@ def api(**p):
             time.sleep(wait)
 
 
-def main(out="data/sources_wikipedia.csv"):
+def main(out="data/sources_wikipedia.csv", topics=None):
     rows = []
-    for t in TOPICS:
+    for t in (topics or TOPICS):
         d = api(action="query", titles=t, prop="langlinks", lllimit="max", redirects=1)
         pg = d["query"]["pages"][0]
         if pg.get("missing"):
@@ -63,4 +63,8 @@ def main(out="data/sources_wikipedia.csv"):
 
 
 if __name__ == "__main__":
-    main()
+    # usage: discover_wikipedia.py [--topics-file topics.txt] [--out data/sources_wikipedia2.csv]   (one English title per line)
+    args = sys.argv[1:]
+    tf = args[args.index("--topics-file") + 1] if "--topics-file" in args else None
+    out = args[args.index("--out") + 1] if "--out" in args else "data/sources_wikipedia.csv"
+    main(out, [line.strip() for line in open(tf, encoding="utf-8") if line.strip()] if tf else None)

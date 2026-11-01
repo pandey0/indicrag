@@ -29,9 +29,17 @@ for m in a.models:
     systems[f"hybrid:{short}"] = ("hybrid", m)
 summ, per = {}, {}
 for name, (kind, model) in systems.items():
-    if kind in ("dense", "hybrid") and not Path(f"data/embeddings/{model.replace('/', '_')}__{Path(a.chunks).stem}.npz").exists():
-        print(f"skip {name}: no embeddings", file=sys.stderr)
-        continue
+    if kind in ("dense", "hybrid"):
+        emb = Path(f"data/embeddings/{model.replace('/', '_')}__{Path(a.chunks).stem}.npz")
+        if not emb.exists():
+            print(f"skip {name}: no embeddings", file=sys.stderr)
+            continue
+        import numpy as np
+
+        missing = set(chunks) - set(np.load(emb, allow_pickle=False)["ids"].tolist())
+        if missing:
+            print(f"skip {name}: embeddings stale ({len(missing)} chunks missing); run python -m src.embed build --model {model}", file=sys.stderr)
+            continue
     s, p = evaluate(items, build_retriever(kind, chunks, model, a.chunks), chunks, a.k)
     summ[name], per[name] = s, {r["id"]: r for r in p}
 
