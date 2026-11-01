@@ -67,7 +67,7 @@ make test
 The corpus is fetched by the ingest scripts under each source's terms and is never committed or baked into images.
 
 ## Results
-Early, small-n measurements are in [`eval/RESULTS.md`](eval/RESULTS.md) (41 human-validated pilot items; English and Hindi only, no Kannada yet). Headline, with caveats stated there: hybrid retrieval beat dense-only retrieval (paired 95% CI excludes 0); no other retriever difference is distinguishable at this sample size. The gold set is not released and these numbers are not a benchmark yet.
+Early, small-n measurements are in [`eval/RESULTS.md`](eval/RESULTS.md): 41 human-validated pilot items (English and Hindi only, no Kannada yet), six retrieval configurations. At this sample size the configurations are mostly statistically indistinguishable (all place the gold passage in the top 5 for about 95-100% of items); one hybrid-over-dense gap appeared with one embedding model and did not replicate with the other, so it is reported as an unconfirmed hint. The gold set is not released and these numbers are not a benchmark yet.
 
 ## Scope, limitations and responsible use
 - Uses only public documents whose licence/terms permit it; the licence decision for each source is recorded in the manifest. Text is redistributed only where allowed; otherwise labels, spans and fetch scripts are released.
