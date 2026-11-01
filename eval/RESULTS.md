@@ -38,7 +38,7 @@ By language, recall@1 (en n=24 / hi n=17): BM25 0.667 / 0.882; char-BM25 0.625 /
 - Not yet run: answer-quality evaluation, closed-book and long-context baselines, larger or paraphrased question sets, other chunk sizes.
 
 ## Other measurements
-- Prompt-injection attack success, claude-haiku-5-5: 0/12 (see `docs/11-security-and-ops.md`).
+- Prompt-injection, claude-haiku-5-5, 24 author-written cases, plain RAG and agent paths, two runs: canary-in-answer upper bound 0-1/24 (RAG) and 1-2/24 (agent); every flagged answer I could read reported and ignored the injection rather than obeying it (see `docs/11-security-and-ops.md` for the metric caveat and limits).
 - Agent eligibility tasks, claude-haiku-5-5, 30 held-out tasks: 29/30 success (see `docs/16-agent-plan.md`, with heavy caveats).
 
 ## End-to-end generation (claude-haiku-5-5, BM25 top-5, 41 validated items) — deterministic scoring, no judge
