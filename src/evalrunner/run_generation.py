@@ -1,6 +1,9 @@
 """End-to-end generation evaluation with deterministic scoring (no judge model), docs/05.
 
-Modes: `rag` (retrieve -> answer_question with citation validation) and `closed_book` (same model, no passages).
+Modes: `rag` (retrieve -> answer_question with citation validation), `closed_book` (same model, no passages) and `long_doc`
+(ORACLE: the whole parsed gold document is placed in context, so retrieval cannot fail; an upper bound on what better retrieval could
+add, not a deployable system. The whole corpus (~1M tokens) does not fit in context, so a true long-context baseline is not run.
+Unanswerable items have no gold document and are skipped in this mode).
 Per answerable item: number_recall = share of the gold answer's numbers (Indic digits normalised) present in the model answer
 (a weak but objective correctness proxy: items whose gold answer has no numbers are scored separately as n/a), cited_gold =
 a cited chunk hits the gold span, refused. Per unanswerable item: abstained (rag only). A judge-based faithfulness/correctness
@@ -19,6 +22,22 @@ from .metrics import ChunkRef, relevance
 
 CLOSED_SYSTEM = ("Answer the question about Indian government services briefly and concretely, in the language of the question. "
                  "If you are not sure, say you are not sure instead of guessing.")
+
+
+LONG_SYSTEM = ("Answer the question using ONLY the document below, briefly and concretely, in the language of the question. "
+               "If the document does not contain the answer, reply exactly NO_ANSWER.\n\nDOCUMENT:\n")
+MAX_DOC_CHARS = 150_000
+
+
+def gold_doc_text(it: dict, root: str = "data/processed") -> str | None:
+    """Parsed text of the first gold evidence document (matched by parsed_sha256), capped; None if unavailable."""
+    from pathlib import Path
+
+    ev = (it.get("evidence") or [None])[0]
+    if not ev:
+        return None
+    f = Path(root, ev["doc_id"], f"{ev['parsed_sha256']}.txt")
+    return f.read_text(encoding="utf-8")[:MAX_DOC_CHARS] if f.exists() else None
 
 
 @dataclass
@@ -48,6 +67,12 @@ def run_generation(items: list[dict], retriever, chunks: dict[str, dict], provid
                 ranked = [ChunkRef(by_cid[c], chunks[by_cid[c]]["doc_id"], chunks[by_cid[c]]["parsed_sha256"], chunks[by_cid[c]]["char_start"],
                                    chunks[by_cid[c]]["char_end"]) for c in a.cited if c in by_cid]
                 cited_gold = any(relevance(ranked, it["evidence"])) if ranked else False
+        elif mode == "long_doc":
+            doc = gold_doc_text(it)
+            if doc is None:
+                continue
+            comp = provider.complete(LONG_SYSTEM + doc, it["question"], 300)
+            text, refused, tin, tout, cited_gold = comp.text, "NO_ANSWER" in comp.text, comp.input_tokens, comp.output_tokens, None
         else:
             comp = provider.complete(CLOSED_SYSTEM, it["question"], 300)
             text, refused, tin, tout, cited_gold = comp.text, False, comp.input_tokens, comp.output_tokens, None

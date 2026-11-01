@@ -33,8 +33,11 @@ Command: `python -m src.evalrunner.run_generation` (needs `ANTHROPIC_API_KEY`). 
 |---|---|---|---|---|---|---|
 | RAG (retrieve + validated citations) | 0.941 | 0.927 | 0.958 | 1 (`b4-hi-004`) | 0.873 (62 of 71) | 4/4 |
 | closed-book (same model, no passages) | 0.598 | 0.373 | 0.879 | n/a | n/a | n/a (no refusal mechanism) |
+| oracle: whole gold document in context (upper bound, not deployable) | 0.952 | 0.947 | 0.958 | 0 | n/a | n/a (unanswerable items have no document) |
 
 Paired difference (RAG - closed-book, 45 items): +0.343, 95% bootstrap CI [+0.217, +0.476]. RAG misses (number recall < 1): `b3-en-009`, `b3-en-010`, `b4-hi-011`, `b4-hi-023`, `b5-en-017` (the reviewer-edited question names no scheme, so retrieval cannot know which is meant). Tokens: RAG 324k in, closed-book 13k in. A repeat run on the same 75 items gave RAG 0.959 overall versus 0.941 here, so run-to-run model variation is about 0.02 and should be treated as noise floor.
+
+**Oracle row.** The model is handed the whole parsed gold document (up to 150k characters), so retrieval cannot fail. It scores 0.952 against 0.941 for RAG: on these items BM25 top-5 loses almost nothing in number recall versus a perfect retriever, and the remaining misses (`b3-en-010`, `b4-hi-011`, `b4-hi-023`, `b5-en-026`) are not retrieval failures. This is NOT the long-context baseline of docs/05: the whole corpus is about 1M tokens and was not run in context. Number recall also cannot see wrong-but-numerically-matching answers.
 
 **Read this carefully.** (1) The retrieval benefit is real but smaller than first measured (earlier +0.66 on 29 items, +0.38 on 37), because the larger set includes questions the model can partly guess. (2) **Closed-book Hindi recall is 0.88, far above English 0.37**: many Hindi items concern well-known national schemes (MGNREGA 100 days, Ayushman 5 lakh, PMJJBY 18-50) that the model knows, so the Hindi slice tests retrieval less than the English myScheme slice does; Hindi RAG-vs-closed gaps are not comparable with English ones. (3) Abstention 4/4 is on n=4 author-chosen questions about named but obscure schemes (95% Wilson lower bound about 0.51); it says the pipeline can refuse, not how reliably it does. (4) Same-family generation, one reviewer, number recall only.
 

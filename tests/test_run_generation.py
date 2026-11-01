@@ -34,3 +34,13 @@ def test_closed_book_has_no_citation_metric_and_no_retrieval():
     rows = run_generation(ITEMS, retr(), CH, p, "closed_book")
     s = summarize(rows)["all"]
     assert p.calls == 2 and s["number_recall"] == 1.0 and s["cited_gold_rate"] is None
+
+
+def test_long_doc_oracle_skips_items_without_a_gold_document(monkeypatch):
+    import src.evalrunner.run_generation as rg
+
+    monkeypatch.setattr(rg, "gold_doc_text", lambda it: TEXT if it.get("evidence") else None)
+    seen = []
+    p = EchoProvider(lambda s, u: seen.append(s) or "Rs 6000 per year.")
+    rows = run_generation(ITEMS, retr(), CH, p, "long_doc")
+    assert [r.id for r in rows] == ["a1"] and TEXT in seen[0] and rows[0].number_recall == 1.0
