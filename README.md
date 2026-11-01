@@ -56,6 +56,16 @@ src/         ingest, parse, chunk, embed, retrieve, generate, security, api, eva
 web/         Next.js 16 / TypeScript UI (ask, cited sources, feedback, disclaimer); browser smoke test in web/e2e
 ```
 
+## Run locally
+```
+pip install -r requirements-api.txt && make ingest-myscheme   # corpus stays local (not redistributed)
+make chunk && make api                                        # retrieval-only unless ANTHROPIC_API_KEY is set
+cd web && npm ci && npm run dev                               # UI on :3000, proxies /api to :8000
+# or: CLIENT_SALT=$(openssl rand -hex 8) docker compose up --build
+make test
+```
+The corpus is fetched by the ingest scripts under each source's terms and is never committed or baked into images.
+
 ## Results
 Not available yet. Planned: retrieval and generation tables per language, baseline comparisons, failure taxonomy, judge-human agreement, latency and cost.
 
