@@ -13,3 +13,8 @@ Tool outputs are untrusted data (indirect injection): wrapped in delimited block
 
 ## Not in this step
 Real-LLM task runs, the >= 30 task gold set, plain-RAG vs agent comparison (need provider key and human-written tasks).
+
+## Status 2026-11-01
+- `scripts/build_agent_tasks.py` builds 36 LLM-drafted eligibility tasks (17 eligible / 16 not eligible / 3 unknown) from myScheme and Wikipedia sentences; scenarios state only the person's facts and the scheme name (no thresholds). Gold criteria are hand-encoded from the quoted sentence; expected decisions are computed by the rules engine and cross-checked. `data/agent/` is gitignored (corpus quotes). All tasks are `review_status: unreviewed`: a human must confirm each gold criteria set encodes its sentence.
+- `src.evalrunner.agent_eval` validates tasks and runs the harness (success, evaluate_rules use, tool errors, steps, tokens, cited gold document). CI-tested with a scripted oracle agent and a deliberately wrong agent. No real-model result exists (`python -m src.evalrunner.agent_eval`, needs `ANTHROPIC_API_KEY`).
+- Caveat: tasks cover single-document, mostly single-criterion eligibility; they do not test multi-scheme comparison or Hindi/Kannada tasks.

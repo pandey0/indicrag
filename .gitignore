@@ -21,3 +21,4 @@ data/gold/drafts/
 eval/results/
 data/labelling/kn_alignment_candidates.csv
 data/labelling/pilot_sheet_twins.csv
+data/agent/
