@@ -4,7 +4,7 @@ Retrieval-augmented question answering over Indian citizen-service documents (sc
 
 The goal is to *measure* whether answers are correct, grounded and in the right language, and to report the numbers with their limits.
 
-> **Status: working system, early measurements, dataset not yet released.** 88 human-validated pilot questions (51 English, 37 Hindi), one reviewer. At this size most differences between retrieval methods are within noise. See [Results](#results) before quoting any number.
+> **Status: working system, early measurements, dataset not yet released.** 88 pilot questions (51 English, 37 Hindi), validated by one author-reviewer; the last 13 were checked by a model reviewer whose decisions the author adopted. At this size most differences between retrieval methods are within noise or confounded by how the questions were written. See [Results](#results) before quoting any number.
 
 ## What is in the repo
 
