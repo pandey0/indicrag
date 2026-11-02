@@ -4,7 +4,7 @@ Retrieval-augmented question answering over Indian citizen-service documents (sc
 
 The goal is to *measure* whether answers are correct, grounded and in the right language, and to report the numbers with their limits.
 
-> **Status: working system, early measurements, dataset not yet released.** 100 pilot questions (57 English, 43 Hindi), validated by one author-reviewer; the last 25 were checked by a model reviewer whose decisions the author adopted. At this size most differences between retrieval methods are within noise or confounded by how the questions were written. See [Results](#results) before quoting any number.
+> **Status: working system, early measurements, gold set published, corpus rebuilt locally.** 100 pilot questions (57 English, 43 Hindi), validated by one author-reviewer; the last 25 were checked by a model reviewer whose decisions the author adopted. At this size most differences between retrieval methods are within noise or confounded by how the questions were written. See [Results](#results) before quoting any number.
 
 ## What is in the repo
 
@@ -52,7 +52,7 @@ Dense retrieval needs `requirements-embed.txt`. `make results GOLD=...` reproduc
 
 ## Data and licensing
 - **Code: MIT** (see `LICENSE`). The licence covers the code only. Source documents and any gold data derived from them keep their own terms (Wikipedia text is CC BY-SA 4.0) and are not covered by it.
-- The raw corpus and the gold set stay local and gitignored. Nothing is published until each source's licence has been reviewed by a human (`docs/03-corpus-and-licensing.md`). Wikipedia text is CC BY-SA 4.0.
+- The gold set (`data/gold/dev.jsonl`, 100 questions with short evidence quotes, no full documents) is published; see `data/gold/NOTICE.md` for sources and terms. Wikipedia-derived quotes are CC BY-SA 4.0. Myscheme excerpts were included without asking the portal owners, and source-licence review was not done (`docs/03-corpus-and-licensing.md`). The full raw corpus stays local and gitignored: rebuild it with `make ingest-myscheme`.
 - Dataset card draft: `docs/17-dataset-card-draft.md`. Labelling guide: `docs/04-labelling-guide.md`.
 
 ## Limitations and responsible use
