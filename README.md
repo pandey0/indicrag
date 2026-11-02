@@ -19,7 +19,7 @@ The goal is to *measure* whether answers are correct, grounded and in the right 
 | Eligibility agent: deterministic rules engine, validated read-only tools, budgeted loop with JSON traces | `src/agent` | working; no advantage over RAG measured |
 | pgvector schema, Docker Compose, CI | `db/`, `docker-compose.yml`, `.github/` | working |
 
-101 tests pass; `ruff` is clean.
+On a clean clone 96 tests pass and 5 skip (they need the locally built corpus); `ruff` is clean.
 
 ## Design choices that matter
 - **Gold evidence is a span, not a chunk id** (document hash, parsed-text hash, parser version, character offsets, verbatim quote). A retrieved chunk hits if it contains the span or overlaps it by at least half, so chunking strategies are compared fairly. The validator checks `quote == text[start:end]`.
@@ -42,7 +42,7 @@ Limits: one reviewer, no agreement statistic; questions were LLM-drafted from pa
 
 ## Quick start
 ```
-python3 -m venv .venv && .venv/bin/pip install -r requirements-api.txt
+python3 -m venv .venv && .venv/bin/pip install -r requirements-api.txt -r requirements-spike.txt
 make ingest-myscheme            # fetch the corpus locally (not redistributed)
 make chunk && make api          # retrieval-only unless ANTHROPIC_API_KEY is set
 cd web && npm ci && npm run dev   # UI on :3000, proxies /api to :8000
