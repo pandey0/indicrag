@@ -4,7 +4,7 @@ Retrieval-augmented question answering over Indian citizen-service documents (sc
 
 The goal is to *measure* whether answers are correct, grounded and in the right language, and to report the numbers with their limits.
 
-> **Status: working system, early measurements, dataset not yet released.** 97 pilot questions (57 English, 40 Hindi), validated by one author-reviewer; the last 22 were checked by a model reviewer whose decisions the author adopted. At this size most differences between retrieval methods are within noise or confounded by how the questions were written. See [Results](#results) before quoting any number.
+> **Status: working system, early measurements, dataset not yet released.** 100 pilot questions (57 English, 43 Hindi), validated by one author-reviewer; the last 25 were checked by a model reviewer whose decisions the author adopted. At this size most differences between retrieval methods are within noise or confounded by how the questions were written. See [Results](#results) before quoting any number.
 
 ## What is in the repo
 
@@ -30,11 +30,11 @@ The goal is to *measure* whether answers are correct, grounded and in the right 
 - **Documents are untrusted input:** 24 prompt-injection cases, PII scrubbing before logging, no personal data stored.
 
 ## Results
-Full tables and caveats: [`eval/RESULTS.md`](eval/RESULTS.md). Headline, on 93 answerable items:
+Full tables and caveats: [`eval/RESULTS.md`](eval/RESULTS.md). Headline, on 96 answerable items:
 
-- **Retrieval:** all six configurations put the gold passage in the top 5 for 95-97% of items; recall@1 ranges from 0.62 to 0.77. e5-small dense is the consistent laggard (char-BM25 and both hybrids beat it with intervals excluding zero; word BM25 is ahead but not clearly); the others are not separated. Questions share vocabulary with their passages, which favours lexical matching, so this is not evidence that BM25 beats dense retrieval in general.
-- **Generation (claude-haiku-5-5):** number recall 0.94 with retrieval vs 0.63 closed-book (paired difference +0.31, 95% CI +0.20 to +0.42). With the whole gold document in context: 0.94, so retrieval is not the bottleneck on these items. Abstention on four unanswerable questions: 4/4.
-- **Hindi caveat:** closed-book Hindi recall is 0.83 because many items concern well-known national schemes, so the Hindi slice tests retrieval less than the English one.
+- **Retrieval:** all six configurations put the gold passage in the top 5 for 95-97% of items; recall@1 ranges from 0.63 to 0.78. e5-small dense is the consistent laggard (char-BM25 and both hybrids beat it with intervals excluding zero; word BM25 is ahead but not clearly); the others are not separated. Questions share vocabulary with their passages, which favours lexical matching, so this is not evidence that BM25 beats dense retrieval in general.
+- **Generation (claude-haiku-5-5):** number recall 0.92 with retrieval vs 0.63 closed-book (paired difference +0.29, 95% CI +0.18 to +0.41). With the whole gold document in context: 0.93, so retrieval is not the bottleneck on these items. Abstention on four unanswerable questions: 4/4.
+- **Hindi caveat:** closed-book Hindi recall is 0.84 because many items concern well-known national schemes, so the Hindi slice tests retrieval less than the English one.
 - **Agent:** on 30 easy single-document eligibility tasks, plain RAG 29/30 vs agent 26/30 (all agent misses were the token budget). No advantage shown.
 - **Injection:** 0-2 of 24 cases flagged by an upper-bound check; flagged answers read as reporting, not obeying, the injection.
 
