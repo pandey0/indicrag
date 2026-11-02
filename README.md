@@ -51,6 +51,7 @@ make test
 Dense retrieval needs `requirements-embed.txt`. `make results GOLD=...` reproduces the retrieval tables if you have a gold file. Docker: `CLIENT_SALT=$(openssl rand -hex 8) docker compose up --build`. The corpus is fetched under each source's terms and is never committed or baked into images.
 
 ## Data and licensing
+- **Code: MIT** (see `LICENSE`). The licence covers the code only. Source documents and any gold data derived from them keep their own terms (Wikipedia text is CC BY-SA 4.0) and are not covered by it.
 - The raw corpus and the gold set stay local and gitignored. Nothing is published until each source's licence has been reviewed by a human (`docs/03-corpus-and-licensing.md`). Wikipedia text is CC BY-SA 4.0.
 - Dataset card draft: `docs/17-dataset-card-draft.md`. Labelling guide: `docs/04-labelling-guide.md`.
 
