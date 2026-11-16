@@ -1,5 +1,5 @@
 # API image. Corpus data (chunks, manifest) is mounted at /app/data, never baked in (licence: redistribute=false).
-FROM python:3.11-slim
+FROM python:3.15-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /app
 COPY requirements-api.txt .
